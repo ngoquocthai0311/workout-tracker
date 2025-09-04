@@ -1,0 +1,57 @@
+<div class="w-screen">
+  <div class="w-4/5 mx-auto">
+    <!-- header -->
+    <div>
+      <p class="w-max mx-auto">Workout tracker</p>
+    </div>
+    <!-- buttons -->
+    <div>
+      <p-button label="Start New Workout" />
+    </div>
+    <!-- quick glance -->
+    <div class="grid grid-cols-2 gap-4">
+      <p-card header="Total workouts"></p-card>
+      <p-card header="Total volume"></p-card>
+      <p-card header="Total Frequent"></p-card>
+      <p-card header="Last Workout"></p-card>
+    </div>
+
+    <!-- recent activity -->
+    <div>
+      <p class="w-max mx-auto">Recent activity</p>
+      <p-table
+        [value]="products"
+        selectionMode="single"
+        [(selection)]="selectedProduct"
+        [metaKeySelection]="metaKey"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '50rem' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-product>
+          <tr [pSelectableRow]="product">
+            <td>{{ product.code }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.quantity }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- buttons for navigation -->
+    <div class="flex justify-evenly">
+      <p-button (click)="navigateToRoutines()" label="Routines" />
+      <p-button (click)="navigateToSessions()" label="Sessions" />
+      <p-button (click)="navigateToExercises()" label="Exercises" />
+      <p-button (click)="navigateToReports()" label="Reports" />
+    </div>
+  </div>
+</div>

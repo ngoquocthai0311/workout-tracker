@@ -1,0 +1,43 @@
+<div class="w-screen">
+  <div class="w-4/5 mx-auto">
+    <!-- header -->
+    <div>
+      <p class="w-max mx-auto">My Sessions</p>
+    </div>
+    <!-- button -->
+    <div>
+      <p-button label="Start New Workout" />
+    </div>
+    <!-- quick glance of sessions -->
+    <!-- TODO: do @for here to get all sessions pagination -->
+    <div>
+      <p-card>
+        <!-- <ng-template #header>
+                </ng-template> -->
+        <ng-template #title> Full body workout </ng-template>
+        <ng-template #subtitle> 4 exercises 12 sets </ng-template>
+        <p>Details of sessions</p>
+        <ng-template #footer>
+          <div class="flex gap-4 mt-1">
+            <p-button label="Detail" class="w-full" styleClass="w-full" />
+            <p-button
+              label="Remove"
+              severity="secondary"
+              class="w-full"
+              [outlined]="true"
+              styleClass="w-full"
+            />
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- buttons for navigation -->
+    <div class="flex justify-evenly">
+      <p-button label="Routines" />
+      <p-button label="Sessions" />
+      <p-button label="Exercises" />
+      <p-button label="Reports" />
+    </div>
+  </div>
+</div>
