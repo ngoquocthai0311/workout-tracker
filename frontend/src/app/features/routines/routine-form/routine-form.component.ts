@@ -1,12 +1,14 @@
+import { ApiService } from './../../../core/services/api.service';
 import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
-import { Component } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-routine-form',
@@ -23,7 +25,10 @@ import { InputIconModule } from 'primeng/inputicon';
   templateUrl: './routine-form.component.html',
   styleUrl: './routine-form.component.scss',
 })
-export class RoutineFormComponent {
+export class RoutineFormComponent implements OnInit, OnDestroy {
+  private apiService = inject(ApiService);
+  private destroy$ = new Subject<void>();
+
   products!: any[];
   selectedProduct!: any;
 
@@ -94,5 +99,15 @@ export class RoutineFormComponent {
         rating: 4,
       },
     ];
+
+    this.apiService
+      .getRoutineById(3)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {});
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
