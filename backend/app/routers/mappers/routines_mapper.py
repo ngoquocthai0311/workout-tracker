@@ -1,7 +1,8 @@
 from app.routers.mappers.base_mapper import BaseResponseMapper
-from app.routers.schemas.response_schemas import ExerciseResponse, RoutineResponse
+from app.routers.schemas.response_schemas import RoutineResponse
 from typing import Sequence
 from app.database.models import Routine
+from app.routers.schemas.response_schemas import RoutineExerciseResponse
 
 
 class RoutineMapper(BaseResponseMapper):
@@ -11,17 +12,16 @@ class RoutineMapper(BaseResponseMapper):
         for routine in routines:
             # construct response dict
             routine_response = RoutineResponse.model_validate(routine)
-            routine_response.exercises = [
-                routine_exercise.exercise for routine_exercise in routine.exercise_links
-            ]
 
-            exercises: list[ExerciseResponse] = []
-            # map for each set
-            for routine_exercise in routine.exercise_links:
-                exercise: ExerciseResponse = ExerciseResponse.model_validate(
-                    routine_exercise.exercise
+            exercises: list[RoutineExerciseResponse] = []
+            # map for each exercise and its set
+            for exercise_link in routine.exercise_links:
+                exercise: RoutineExerciseResponse = (
+                    RoutineExerciseResponse.model_validate(exercise_link.exercise)
                 )
-                exercise.sets = routine_exercise.routine_exercise_sets
+                exercise.exercise_id = exercise.id
+                exercise.id = exercise_link.id
+                exercise.sets = exercise_link.routine_exercise_sets
                 exercises.append(exercise)
 
             routine_response.exercises = exercises
@@ -37,13 +37,15 @@ class RoutineMapper(BaseResponseMapper):
             routine_exercise.exercise for routine_exercise in routine.exercise_links
         ]
 
-        exercises: list[ExerciseResponse] = []
+        exercises: list[RoutineExerciseResponse] = []
         # map for each set
-        for routine_exercise in routine.exercise_links:
-            exercise: ExerciseResponse = ExerciseResponse.model_validate(
-                routine_exercise.exercise
+        for exercise_link in routine.exercise_links:
+            exercise: RoutineExerciseResponse = RoutineExerciseResponse.model_validate(
+                exercise_link.exercise
             )
-            exercise.sets = routine_exercise.routine_exercise_sets
+            exercise.exercise_id = exercise.id
+            exercise.id = exercise_link.id
+            exercise.sets = exercise_link.routine_exercise_sets
             exercises.append(exercise)
 
         results.exercises = exercises

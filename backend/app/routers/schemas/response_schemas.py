@@ -11,28 +11,29 @@ class ExerciseResponse(SQLModel):
     created_at: float
     updated_at: float
     max_weight: Optional[int] = None
-    sets: list["ExerciseSetResponse"] = None
-
-
-class ExerciseSetResponse(SQLModel):
-    id: int
-    set_number: int
-    set_type: str
-    targeted_weight: int
-    targeted_reps: int
 
 
 # endregion
 
 
 # region Routine response schemas
+class ExerciseSetResponse(SQLModel):
+    id: Optional[int] = None
+    routine_exercise_id: Optional[int] = None
+    set_type: str
+    targeted_weight: int
+    targeted_reps: int
+
+
 class RoutineExerciseResponse(SQLModel):
-    id: int
-    exercise_id: int
-    order: int = 1
-    exercise: ExerciseResponse
+    id: Optional[int] = None
+    exercise_id: Optional[int] = None
+    name: str
+    description: Optional[str] = None
     created_at: float
     updated_at: float
+    max_weight: Optional[int] = None
+    sets: list["ExerciseSetResponse"] = None
 
 
 class RoutineResponse(SQLModel):
@@ -42,7 +43,7 @@ class RoutineResponse(SQLModel):
     created_at: float
     updated_at: float
     user_id: int
-    exercises: list[ExerciseResponse] = None
+    exercises: list[RoutineExerciseResponse] = None
 
 
 # endregion
@@ -64,7 +65,7 @@ class SessionResponse(SQLModel):
 
 class SessionExerciseResponse(SQLModel):
     class SessionExerciseSetResponse(SQLModel):
-        session_exercise_id: Optional[int] = 0
+        id: Optional[int] = 0
         set_type: Optional[str] = "normal"
         weight_lifted: Optional[int] = 0
         reps_completed: Optional[int] = 0

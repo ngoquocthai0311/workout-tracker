@@ -43,7 +43,7 @@ class CreateRoutineRequest(SQLModel):
             targeted_weight: Optional[int] = 0
             targeted_reps: Optional[int] = 0
 
-        exercise_id: int
+        exercise_id: Optional[int] = None
         sets: list[ExerciseSet] = None
 
     name: str
@@ -55,11 +55,12 @@ class CreateRoutineRequest(SQLModel):
 class UpdateRoutineRequest(SQLModel):
     class RoutineExerciseRequest(SQLModel):
         class ExerciseSet(SQLModel):
-            set_id: Optional[int] = None
+            id: Optional[int] = None
             set_type: Optional[str] = "normal"
             targeted_weight: Optional[int] = 0
             targeted_reps: Optional[int] = 0
 
+        id: Optional[int] = None
         exercise_id: int
         sets: list[ExerciseSet] = None
 
@@ -80,7 +81,7 @@ class CreateWorkoutSessionRequest(SQLModel):
             weight_lifted: Optional[int] = 0
             reps_completed: Optional[int] = 0
 
-        exercise_id: int
+        id: int
         sets: list[ExerciseSet] = None
 
         # TODO: Notes field can be add for each workout session exercise link
@@ -97,12 +98,12 @@ class CreateWorkoutSessionRequest(SQLModel):
 class UpdateWorkoutSessionRequest(SQLModel):
     class RoutineExerciseRequest(SQLModel):
         class ExerciseSet(SQLModel):
-            session_exercise_id: Optional[int] = None
+            id: Optional[int] = None
             set_type: Optional[str] = "normal"
             weight_lifted: Optional[int] = 0
             reps_completed: Optional[int] = 0
 
-        exercise_id: int
+        id: int
         sets: list[ExerciseSet] = None
 
         # TODO: Notes field can be add for each workout session exercise link

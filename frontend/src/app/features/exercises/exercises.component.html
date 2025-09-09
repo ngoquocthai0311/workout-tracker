@@ -15,56 +15,42 @@
         <p class="w-max mx-auto">Recent Exercises</p>
         <p-iconfield>
           <p-inputicon styleClass="pi pi-search" />
-          <input type="text" pInputText placeholder="Search" />
+          <input
+            type="text"
+            (input)="searchExercise($event)"
+            pInputText
+            placeholder="Search"
+          />
         </p-iconfield>
       </div>
       <div class="border-solid border-4 rounded-lg">
         <!-- TODO: do virtual scorlling here for performance -->
         <p-scrollpanel [style]="{ width: '100%', height: '500px' }">
-          <p-card header="Back day exercise">
-            <!-- TODO: add all the names of the exercise or quick info like exercises and sets -->
-            <p>some detail here</p>
-            <p-button label="Detail" (click)="showDialog()" />
-          </p-card>
-          <p-card header="Chest..d.  exercise">
-            <p>some detail here</p>
-            <p-button label="Detail" (click)="showDialog()" />
-          </p-card>
-          <p-card header="Leg day exercise">
-            <p>some detail here</p>
-            <p-button label="Detail" (click)="showDialog()" />
-          </p-card>
-          <p-card header="Arms... exercise">
-            <p>some detail here</p>
-            <p-button label="Detail" (click)="showDialog()" />
-          </p-card>
+          @for (exercise of filteredExercises; track exercise.id) {
+            <p-card header="Back day exercise">
+              <ng-template #title>
+                {{ exercise.name }}
+              </ng-template>
+              <ng-template #subtitle> {{ exercise.description }} </ng-template>
+              <p>Personal Best: {{ exercise.max_weight || 0 }} kg</p>
+              <ng-template #footer>
+                <div class="flex gap-4 mt-1">
+                  <p-button label="Detail" class="w-full" styleClass="w-full" />
+                  <p-button
+                    (click)="removeExercise(exercise.id)"
+                    label="Remove"
+                    severity="secondary"
+                    class="w-full"
+                    [outlined]="true"
+                    styleClass="w-full"
+                  />
+                </div>
+              </ng-template>
+            </p-card>
+          }
         </p-scrollpanel>
       </div>
     </div>
-
-    <!-- recent activity -->
-    <!-- <div>
-            <p class="w-max mx-auto">Recent activity</p>
-            <p-table [value]="products" selectionMode="single" [(selection)]="selectedProduct" [metaKeySelection]="metaKey" dataKey="id" [tableStyle]="{ 'min-width': '50rem' }">
-                <ng-template #header>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                    </tr>
-                </ng-template>
-                <ng-template #body let-product>
-                    <tr [pSelectableRow]="product">
-                        <td>{{ product.code }}</td>
-                        <td>{{ product.name }}</td>
-                        <td>{{ product.category }}</td>
-                        <td>{{ product.quantity }}</td>
-                    </tr>
-                </ng-template>
-        </p-table>
-        </div> -->
-
     <!-- buttons for navigation -->
     <div class="flex justify-evenly">
       <p-button label="Routines" />
@@ -83,16 +69,34 @@
   [(visible)]="visible"
   [style]="{ width: '25rem' }"
 >
-  <div class="flex items-center gap-4 mb-4">
-    <label for="username" class="font-semibold w-24">Name</label>
-    <input pInputText id="username" class="flex-auto" autocomplete="off" />
-  </div>
-  <div class="flex items-center gap-4 mb-8">
-    <label for="email" class="font-semibold w-24">Description</label>
-    <input pInputText id="email" class="flex-auto" autocomplete="off" />
-  </div>
-  <div class="flex justify-end gap-2">
-    <p-button label="Cancel" severity="secondary" (click)="visible = false" />
-    <p-button label="Save" (click)="visible = false" />
-  </div>
+  <form [formGroup]="createExerciseFormGroup" (ngSubmit)="onCreateExercise()">
+    <div class="flex items-center gap-4 mb-4">
+      <label for="name" class="font-semibold w-24">Name</label>
+      <input
+        pInputText
+        id="name"
+        class="flex-auto"
+        formControlName="name"
+        autocomplete="off"
+      />
+    </div>
+    <div class="flex items-center gap-4 mb-8">
+      <label for="description" class="font-semibold w-24">Description</label>
+      <input
+        pInputText
+        id="description"
+        formControlName="description"
+        class="flex-auto"
+        autocomplete="off"
+      />
+    </div>
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" severity="secondary" (click)="closeDialog()" />
+      <p-button
+        type="submit"
+        [disabled]="!createExerciseFormGroup.valid"
+        label="Save"
+      />
+    </div>
+  </form>
 </p-dialog>

@@ -9,7 +9,7 @@ class ExerciseMapper(BaseResponseMapper):
         # return as it is because there's no need for special mapping
         return exercises
 
-    def transform_to_response(self, exercise: Exercise, max_weight: int = 0):
+    def transform_to_response(self, exercise: Exercise, max_weight: bool = False):
         response_model = ExerciseResponse.model_validate(exercise)
 
         if max_weight:

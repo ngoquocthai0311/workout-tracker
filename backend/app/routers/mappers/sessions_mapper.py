@@ -33,9 +33,6 @@ class WorkoutSessionMapper(BaseResponseMapper):
                         session_exercise
                     )
                 )
-                session_exercise_response_model.session_exercise_id = (
-                    session_exercise.id
-                )
 
                 dictionary[session_exercise.order].sets.append(
                     session_exercise_response_model
@@ -68,7 +65,6 @@ class WorkoutSessionMapper(BaseResponseMapper):
                     session_exercise
                 )
             )
-            session_exercise_response_model.session_exercise_id = session_exercise.id
             session_exercise_response_model.set_type = session_exercise.set_type
 
             dictionary[session_exercise.order].sets.append(

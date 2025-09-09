@@ -80,7 +80,7 @@ def create_exercise(
     session.commit()
     session.refresh(exercise)
 
-    return mapper.transform_to_response()
+    return mapper.transform_to_response(exercise=exercise)
 
 
 @router.patch(
@@ -118,7 +118,7 @@ def update_exercise(
         session.commit()
         session.refresh(exercise)
 
-        return mapper.transform_to_response(exercise)
+        return mapper.transform_to_response(exercise, max_weight=True)
 
     return Response(status_code=204)
 

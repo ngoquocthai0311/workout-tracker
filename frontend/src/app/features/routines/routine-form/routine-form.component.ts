@@ -1,3 +1,4 @@
+import { ExerciseSet } from './../../../shared/models/models';
 import { ApiService } from './../../../core/services/api.service';
 import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +10,8 @@ import { DividerModule } from 'primeng/divider';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Subject, takeUntil } from 'rxjs';
+import { RoutineExercise, Routine } from '../../../shared/models/models';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-routine-form',
@@ -27,7 +30,12 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class RoutineFormComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
+  private routineId: number = 0;
+  public exercises: RoutineExercise[] = [];
+
+  public routine: Routine = {} as Routine;
 
   products!: any[];
   selectedProduct!: any;
@@ -37,73 +45,117 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit() {
-    this.products = [
-      {
-        id: '1000',
-        code: 'f230fh0g3',
-        name: 'Bamboo Watch',
-        description: 'Product Description',
-        image: 'bamboo-watch.jpg',
-        price: 65,
-        category: 'Accessories',
-        quantity: 24,
-        inventoryStatus: 'INSTOCK',
-        rating: 5,
-      },
-      {
-        id: '1001',
-        code: 'nvklal433',
-        name: 'Black Watch',
-        description: 'Product Description',
-        image: 'black-watch.jpg',
-        price: 72,
-        category: 'Accessories',
-        quantity: 61,
-        inventoryStatus: 'OUTOFSTOCK',
-        rating: 4,
-      },
-      {
-        id: '1002',
-        code: 'zz21cz3c1',
-        name: 'Blue Band',
-        description: 'Product Description',
-        image: 'blue-band.jpg',
-        price: 79,
-        category: 'Fitness',
-        quantity: 2,
-        inventoryStatus: 'LOWSTOCK',
-        rating: 3,
-      },
-      {
-        id: '1003',
-        code: '244wgerg2',
-        name: 'Blue T-Shirt',
-        description: 'Product Description',
-        image: 'blue-t-shirt.jpg',
-        price: 29,
-        category: 'Clothing',
-        quantity: 25,
-        inventoryStatus: 'INSTOCK',
-        rating: 5,
-      },
-      {
-        id: '1004',
-        code: 'h456wer53',
-        name: 'Bracelet',
-        description: 'Product Description',
-        image: 'bracelet.jpg',
-        price: 15,
-        category: 'Accessories',
-        quantity: 73,
-        inventoryStatus: 'INSTOCK',
-        rating: 4,
-      },
-    ];
+    this.routineId = this.router.url.split('/').pop() as unknown as number;
+    this.fetchRoutine();
+    this.fetchExercises();
+  }
 
+  updateRoutine() {
     this.apiService
-      .getRoutineById(3)
+      .updateRoutineById(this.routineId, this.routine)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {});
+      .subscribe((data) => {
+        this.fetchRoutine();
+      });
+  }
+
+  fetchExercises() {
+    this.apiService
+      .getExercises()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.exercises = data as RoutineExercise[];
+      });
+  }
+
+  fetchRoutine() {
+    if (!this.routineId) {
+      // TODO: add error here or redirect
+      return;
+    }
+    this.apiService
+      .getRoutineById(this.routineId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.routine = data as Routine;
+        console.log(this.routine);
+      });
+  }
+
+  removeSet(setIndex: number, exerciseId?: number) {
+    console.log(exerciseId, setIndex);
+    if (!exerciseId) {
+      this.fetchRoutine();
+      return;
+    }
+
+    for (const index in this.routine.exercises) {
+      const exercise: RoutineExercise =
+        this.routine.exercises[index as unknown as number];
+      if (exercise.id === exerciseId && exercise.sets) {
+        exercise.sets.splice(setIndex, 1);
+        return;
+      }
+    }
+  }
+
+  addSet(exerciseNumber: number) {
+    if (this.routine.exercises) {
+      const exercise: RoutineExercise = this.routine.exercises[exerciseNumber];
+      if (!exercise.sets) {
+        exercise.sets = [];
+      }
+
+      exercise.sets.push({
+        set_type: 'normal',
+        targeted_weight: 0,
+        targeted_reps: 0,
+      } as ExerciseSet);
+    }
+  }
+
+  addExercise(exerciseId?: number) {
+    if (!exerciseId) {
+      this.fetchRoutine();
+      return;
+    }
+
+    const exercise: RoutineExercise | undefined = this.exercises.find(
+      (exercise) => exercise.id === exerciseId,
+    );
+
+    if (exercise) {
+      this.routine.exercises?.push(exercise);
+    }
+  }
+
+  removeExercise(exerciseNumber: number) {
+    if (this.routine.exercises) {
+      this.routine.exercises.splice(exerciseNumber, 1);
+    }
+  }
+
+  public createRoutine() {
+    const newRoutine: Routine = {
+      name: 'testing again 123',
+      description: 'something',
+      user_id: 1,
+    };
+    this.apiService
+      .createRoutine(newRoutine)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        console.log(data);
+      });
+  }
+
+  public removeRoutine() {
+    this.apiService
+      .removeRoutineById(24)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((message) => {
+        console.log(message);
+      });
   }
 
   ngOnDestroy(): void {

@@ -1,10 +1,14 @@
 <!-- TODO: using router outlet here with specific name to navigate to correct component -->
 
+<!-- Focus on creating routine / edit routine first -->
 <div class="w-screen">
   <!-- edit/ create routine -->
   <div class="w-4/5 mx-auto">
     <!-- TODO: dynamic create and edit routine -->
-    <div>Edit routine</div>
+    <div class="flex">
+      <div>Edit routine</div>
+      <p-button label="Update" (click)="updateRoutine()" />
+    </div>
 
     <!-- TODO: drag and drop area -->
     <div>
@@ -12,6 +16,7 @@
         <div class="flex items-center gap-4 mb-4">
           <label for="username" class="font-semibold w-24">Name</label>
           <input
+            [(ngModel)]="routine.name"
             pInputText
             id="username"
             class="flex-auto"
@@ -20,66 +25,96 @@
         </div>
         <div class="flex items-center gap-4 mb-8">
           <label for="email" class="font-semibold w-24">Description</label>
-          <input pInputText id="email" class="flex-auto" autocomplete="off" />
+          <input
+            [(ngModel)]="routine.description"
+            pInputText
+            id="email"
+            class="flex-auto"
+            autocomplete="off"
+          />
         </div>
       </div>
 
       <!-- list of exercises -->
       <div class="mb-4">
-        <p-card header="Exercise name">
-          <div class="flex items-center gap-4 mb-4">
-            <label for="username" class="font-semibold w-24">Note</label>
-            <input
-              pInputText
-              id="username"
-              class="flex-auto"
-              autocomplete="off"
-            />
-          </div>
-          <!-- list of exercises -->
-          <div>
-            <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
-              <ng-template #header>
-                <tr>
-                  <th>Code</th>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Quantity</th>
-                  <th style="width: 5rem"></th>
-                </tr>
-              </ng-template>
-              <ng-template #body let-product>
-                <tr>
-                  <td><input type="text" pInputText placeholder="Search" /></td>
-                  <td>{{ product.name }}</td>
-                  <td>{{ product.category }}</td>
-                  <td>{{ product.quantity }}</td>
-                  <td>
-                    <p-button
-                      icon="pi pi-search"
-                      severity="secondary"
-                      rounded
-                    />
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
-            <p-button
-              class="w-full"
-              label="Add new set"
-              variant="text"
-              [raised]="true"
-              severity="info"
-            />
-          </div>
-          <p class="m-0">Lorem ipsum dolor sit amet...</p>
-        </p-card>
-        <p-card header="Simple Card">
-          <p class="m-0">Lorem ipsum dolor sit amet...</p>
-        </p-card>
-        <p-card header="Simple Card">
-          <p class="m-0">Lorem ipsum dolor sit amet...</p>
-        </p-card>
+        @for (
+          exercise of routine.exercises;
+          track $index;
+          let exerciseNumber = $index
+        ) {
+          <p-card>
+            <ng-template #title>
+              {{ exercise.name }}
+            </ng-template>
+            <ng-template #footer>
+              <div class="flex gap-4 mt-1">
+                <p-button
+                  label="Add set"
+                  (click)="addSet(exerciseNumber)"
+                  class="w-full"
+                  styleClass="w-full"
+                />
+                <p-button
+                  (click)="removeExercise(exerciseNumber)"
+                  label="Remove"
+                  severity="secondary"
+                  class="w-full"
+                  [outlined]="true"
+                  styleClass="w-full"
+                />
+              </div>
+            </ng-template>
+            <div class="flex items-center gap-4 mb-4">
+              <label for="username" class="font-semibold w-24">Note</label>
+              <input
+                [(ngModel)]="exercise.description"
+                pInputText
+                id="username"
+                class="flex-auto"
+                autocomplete="off"
+              />
+            </div>
+            <!-- list of sets -->
+            <div>
+              <p-table
+                [value]="exercise.sets || []"
+                [tableStyle]="{ 'min-width': '50rem' }"
+              >
+                <ng-template #header>
+                  <tr>
+                    <th>Set type</th>
+                    <th>Target Weight</th>
+                    <th>Target Reps</th>
+                    <th></th>
+                    <th style="width: 5rem"></th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-set let-setIndex="rowIndex">
+                  <tr>
+                    <td>
+                      <input
+                        type="text"
+                        [(ngModel)]="set.set_type"
+                        pInputText
+                        placeholder="Search"
+                      />
+                    </td>
+                    <td>{{ set.targeted_weight }}</td>
+                    <td>{{ set.targeted_reps }}</td>
+                    <td>
+                      <p-button
+                        (click)="removeSet(setIndex, exercise.id)"
+                        icon="pi pi-trash"
+                        severity="secondary"
+                        rounded
+                      />
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </p-card>
+        }
       </div>
     </div>
   </div>
@@ -106,33 +141,21 @@
     <div>
       <p>All exercises</p>
       <div>
-        <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
-          <!-- <ng-template #header>
-                        <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th style="width: 5rem"></th>
-                        </tr>
-                    </ng-template> -->
-          <ng-template #body let-product>
+        <p-table [value]="exercises" [tableStyle]="{ 'min-width': '50rem' }">
+          <ng-template #body let-exercise>
             <tr>
-              <td>add icon</td>
-              <td>{{ product.name }}</td>
-              <!-- <td>{{ product.category }}</td>
-                            <td>{{ product.quantity }}</td>
-                            <td>
-                                <p-button icon="pi pi-search" severity="secondary" rounded />
-                            </td> -->
+              <td>
+                <p-button
+                  (click)="addExercise(exercise.id)"
+                  icon="pi pi-plus"
+                  severity="secondary"
+                  rounded
+                />
+              </td>
+              <td>{{ exercise.name }}</td>
             </tr>
           </ng-template>
         </p-table>
-        <p-button
-          class="w-full"
-          label="Add new set"
-          variant="text"
-          [raised]="true"
-          severity="info"
-        />
       </div>
     </div>
   </div>

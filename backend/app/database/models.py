@@ -49,8 +49,8 @@ class RoutineExerciseSet(BaseModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    routine_exercise_id: int = Field(
-        foreign_key="routines_exercises.id", ondelete="CASCADE"
+    routine_exercise_id: Optional[int] = Field(
+        default=None, foreign_key="routines_exercises.id", ondelete="CASCADE"
     )
     set_number: int = Field(default=1)
     set_type: str = Field(default="normal")

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse, Response
-from sqlmodel import Session, select, and_
+from sqlmodel import Session, select
 from sqlalchemy.orm import joinedload
 
 from app.database.models import Routine, RoutineExercise, RoutineExerciseSet
@@ -11,7 +11,6 @@ from app.routers.schemas.request_schemas import (
     UpdateRoutineRequest,
 )
 from app.dependencies import get_db, get_routine_mapper
-from typing import Optional
 from app.routers.schemas.response_schemas import RoutineResponse
 from app.routers.mappers.routines_mapper import RoutineMapper
 
@@ -90,7 +89,7 @@ def create_routine(
                 order=exercise_index + 1,
                 created_at=timestamp,
                 updated_at=timestamp,
-                exercise_set=[
+                routine_exercise_sets=[
                     RoutineExerciseSet(
                         set_number=set_index + 1,
                         set_type="normal",
@@ -98,10 +97,14 @@ def create_routine(
                         targeted_weight=each_set.targeted_weight,
                     )
                     for set_index, each_set in enumerate(exercise.sets)
-                ],
+                ]
+                if exercise.sets
+                else [],
             )
             for exercise_index, exercise in enumerate(input.exercises)
-        ],
+        ]
+        if input.exercises
+        else [],
     )
 
     session.add(routine)
@@ -117,9 +120,9 @@ def create_routine(
             select(Routine)
             .where(Routine.id == routine.id)
             .options(
-                joinedload(Routine.exercise_links)
-                .joinedload(RoutineExercise.exercise)
-                .joinedload(RoutineExercise.routine_exercise_sets)
+                joinedload(Routine.exercise_links).joinedload(
+                    RoutineExercise.routine_exercise_sets
+                )
             )
         )
         .unique()
@@ -145,7 +148,20 @@ def update_routine(
     mapper: RoutineMapper = Depends(get_routine_mapper),
     session: Session = Depends(get_db),
 ):
-    routine = session.get(Routine, routine_id)
+    routine = (
+        session.exec(
+            select(Routine)
+            .where(Routine.id == routine_id)
+            .options(
+                joinedload(Routine.exercise_links).joinedload(
+                    RoutineExercise.routine_exercise_sets
+                ),
+                joinedload(Routine.exercise_links).joinedload(RoutineExercise.exercise),
+            )
+        )
+        .unique()
+        .one()
+    )
     if not routine:
         raise HTTPException(status_code=404, detail="Routine not found")
 
@@ -165,64 +181,82 @@ def update_routine(
 
     if input.exercises and len(input.exercises) > 0:
         is_edited = True
-        associated_exercise_ids = [
-            exercise.exercise_id for exercise in routine.exercise_links
-        ]
 
-        # update new one
-        # including new exercise add in based the index of the exercise array
-        for index, exercise in enumerate(input.exercises):
-            exercise_details: UpdateRoutineRequest.RoutineExerciseRequest = exercise
+        routine_exercises: dict = {
+            routine_exercise.id: routine_exercise
+            for routine_exercise in routine.exercise_links
+        }
 
-            # check for routine_exercise, update or create
-            routine_exercise = None
-            if exercise_details.exercise_id not in associated_exercise_ids:
-                routine_exercise = RoutineExercise(
+        for exercise_order, input_exercise in enumerate(input.exercises):
+            # look for routine exercise that match with id
+            if input_exercise.id in routine_exercises.keys():
+                routine_exercise: RoutineExercise = routine_exercises[input_exercise.id]
+
+                routine_exercise.order = exercise_order + 1
+                routine_exercise.updated_at = timestamp
+                routine_exercise.exercise_id = input_exercise.exercise_id
+
+                # update set
+                routine_exercise_sets: dict = {
+                    each_set.id: each_set
+                    for each_set in routine_exercise.routine_exercise_sets
+                }
+
+                for set_order, input_exercise_set in enumerate(input_exercise.sets):
+                    if input_exercise_set.id in routine_exercise_sets.keys():
+                        routine_exercise_set: RoutineExerciseSet = (
+                            routine_exercise_sets[input_exercise_set.id]
+                        )
+                        routine_exercise_set.set_number = set_order + 1
+                        routine_exercise_set.set_type = input_exercise_set.set_type
+                        routine_exercise_set.targeted_weight = (
+                            input_exercise_set.targeted_weight
+                        )
+                        routine_exercise_set.targeted_reps = (
+                            input_exercise_set.targeted_reps
+                        )
+
+                        del routine_exercise_sets[input_exercise_set.id]
+                    # create new routine exercise set
+                    else:
+                        routine_exercise_set: RoutineExerciseSet = RoutineExerciseSet(
+                            routine_exercise=routine_exercise,
+                            set_number=set_order + 1,
+                            set_type="normal",
+                            targeted_reps=input_exercise_set.targeted_reps,
+                            targeted_weight=input_exercise_set.targeted_weight,
+                        )
+                        session.add(routine_exercise_set)
+
+                # delete remaining sets:
+                for removed_routine_exercise_set in routine_exercise_sets.values():
+                    session.delete(removed_routine_exercise_set)
+
+                del routine_exercises[input_exercise.id]
+            # create new routine exercise if not exist
+            else:
+                routine_exercise: RoutineExercise = RoutineExercise(
                     routine=routine,
-                    exercise_id=exercise_details.exercise_id,
-                    order=index + 1,
+                    exercise_id=input_exercise.id,
+                    order=exercise_order + 1,
                     created_at=timestamp,
                     updated_at=timestamp,
-                )
-            else:
-                routine_exercise: Optional[RoutineExercise] = session.exec(
-                    select(RoutineExercise).where(
-                        and_(
-                            RoutineExercise.routine_id == routine_id,
-                            RoutineExercise.exercise_id == exercise_details.exercise_id,
+                    routine_exercise_sets=[
+                        RoutineExerciseSet(
+                            set_number=set_order + 1,
+                            set_type=input_exercise_set.set_type,
+                            targeted_reps=input_exercise_set.targeted_reps,
+                            targeted_weight=input_exercise_set.targeted_weight,
                         )
-                    )
-                ).one()
-                routine_exercise.order = index + 1
-                routine_exercise.updated_at = (timestamp,)
-
-            # update exercise set based on exercise details
-            # get a list of sets
-            for index, each_set in enumerate(exercise_details.sets):
-                set_details: UpdateRoutineRequest.RoutineExerciseRequest.ExerciseSet = (
-                    each_set
-                )
-                exercise_set = None
-                if not set_details.set_id:
-                    exercise_set = RoutineExerciseSet(
-                        routine_exercise=routine_exercise,
-                        set_number=index + 1,
-                        set_type="normal",
-                        targeted_reps=each_set.targeted_reps,
-                        targeted_weight=each_set.targeted_weight,
-                    )
-                    session.add(exercise_set)
-                else:
-                    exercise_set = session.exec(
-                        select(RoutineExerciseSet).where(
-                            RoutineExerciseSet.id == set_details.set_id
+                        for set_order, input_exercise_set in enumerate(
+                            input_exercise.sets
                         )
-                    ).one()
-                    exercise_set.set_number = index + 1
-                    exercise_set.targeted_reps = set_details.targeted_reps
-                    exercise_set.targeted_weight = set_details.targeted_weight
-
-            session.add(routine_exercise)
+                    ],
+                )
+                session.add(routine_exercise)
+        # remove remaining routine_exercises that do not do any update
+        for removed_routine_exercise in routine_exercises.values():
+            session.delete(removed_routine_exercise)
 
     if is_edited:
         routine.updated_at = timestamp
