@@ -31,8 +31,8 @@ def read_sessions(
     workout_sessions = (
         session.exec(
             select(WorkoutSession).options(
-                joinedload(WorkoutSession.exercise_links).options(
-                    joinedload(SessionExercise.exercise),
+                joinedload(WorkoutSession.exercise_links).joinedload(
+                    SessionExercise.exercise
                 )
             )
         )
@@ -53,7 +53,19 @@ def get_session(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
 ):
-    workout_session = session.get(WorkoutSession, session_id)
+    workout_session = (
+        session.exec(
+            select(WorkoutSession)
+            .where(WorkoutSession.id == session_id)
+            .options(
+                joinedload(WorkoutSession.exercise_links).joinedload(
+                    SessionExercise.exercise
+                )
+            )
+        )
+        .unique()
+        .one()
+    )
     if not workout_session:
         raise HTTPException(status_code=404, detail="Workout session not found")
 
@@ -95,7 +107,7 @@ def create_session(
 
                 workout_session_exercise = SessionExercise(
                     session=workout_session,
-                    exercise_id=exercise_details.exercise_id,
+                    exercise_id=exercise_details.id,
                     order=exercise_index + 1,
                     set_number=set_index + 1,
                     set_type=exercise_set.set_type,
@@ -123,7 +135,20 @@ def update_session(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
 ):
-    workout_session = session.get(WorkoutSession, workout_session_id)
+    workout_session: WorkoutSession = (
+        session.exec(
+            select(WorkoutSession)
+            .where(WorkoutSession.id == workout_session_id)
+            .options(
+                joinedload(WorkoutSession.exercise_links).options(
+                    joinedload(SessionExercise.exercise),
+                )
+            )
+        )
+        .unique()
+        .one()
+    )
+
     if not workout_session:
         raise HTTPException(status_code=404, detail="Workout session not found")
 
@@ -155,6 +180,18 @@ def update_session(
 
     if input.exercises and len(input.exercises) > 0:
         is_edited = True
+
+        # idea:
+        # get dictionary for session exercise
+        # then iterate through the input to keep track of the exercise order and set number
+        # do the update accordingly, if not exist then create new
+        # then remove the remaining session exercises within a session
+
+        session_exercises: dict = {
+            exercise_session.id: exercise_session
+            for exercise_session in workout_session.exercise_links
+        }
+
         for exercise_index, exercise in enumerate(input.exercises):
             exercise_details: UpdateWorkoutSessionRequest.RoutineExerciseRequest = (
                 exercise
@@ -166,13 +203,10 @@ def update_session(
             for set_index, set in enumerate(exercise_details.sets):
                 exercise_set: UpdateWorkoutSessionRequest.RoutineExerciseRequest.ExerciseSet = set
                 workout_session_exercise = None
-                if exercise_set.session_exercise_id:
-                    workout_session_exercise = session.exec(
-                        select(SessionExercise).where(
-                            SessionExercise.id == exercise_set.session_exercise_id
-                        )
-                    ).one()
-
+                if exercise_set.id in session_exercises.keys():
+                    workout_session_exercise: SessionExercise = session_exercises[
+                        exercise_set.id
+                    ]
                     workout_session_exercise.order = exercise_index + 1
                     workout_session_exercise.set_number = set_index + 1
                     workout_session_exercise.set_type = exercise_set.set_type
@@ -180,10 +214,12 @@ def update_session(
                     workout_session_exercise.reps_completed = (
                         exercise_set.reps_completed
                     )
+
+                    del session_exercises[exercise_set.id]
                 else:
                     workout_session_exercise = SessionExercise(
                         session=workout_session,
-                        exercise_id=exercise_details.exercise_id,
+                        exercise_id=exercise_details.id,
                         order=exercise_index + 1,
                         set_number=set_index + 1,
                         set_type=exercise_set.set_type,
@@ -193,6 +229,10 @@ def update_session(
                     )
 
                 session.add(workout_session_exercise)
+
+            # remove remaining session_exercises
+            for removed_session_exercises in session_exercises.values():
+                session.delete(removed_session_exercises)
 
     if is_edited:
         workout_session.updated_at = timestamp

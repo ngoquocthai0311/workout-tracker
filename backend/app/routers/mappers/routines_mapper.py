@@ -7,6 +7,14 @@ from app.routers.schemas.response_schemas import RoutineExerciseResponse
 
 class RoutineMapper(BaseResponseMapper):
     def map_list_to_response(self, routines: Sequence[Routine]):
+        # sort nested routine exercise and routine exercise set
+        for routine in routines:
+            routine.exercise_links.sort(key=lambda x: (x.order))
+            for routine_exercise in routine.exercise_links:
+                routine_exercise.routine_exercise_sets.sort(
+                    key=lambda x: (x.set_number)
+                )
+
         results: list[RoutineResponse] = []
         # mapping each routine
         for routine in routines:
@@ -31,6 +39,11 @@ class RoutineMapper(BaseResponseMapper):
         return results
 
     def transform_to_response(self, routine: Routine):
+        # sort nested routine exercise and routine exercise set
+        routine.exercise_links.sort(key=lambda x: (x.order))
+        for routine_exercise in routine.exercise_links:
+            routine_exercise.routine_exercise_sets.sort(key=lambda x: (x.set_number))
+
         # construct response dict
         results = RoutineResponse.model_validate(routine)
         results.exercises = [
