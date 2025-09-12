@@ -16,14 +16,14 @@ export const routes: Routes = [
     title: 'Exercise',
   },
   {
-    path: 'routine/create-routine',
+    path: 'routine/:id',
     loadComponent: () =>
       import('./features/routines/routine-form/routine-form.component').then(
         (m) => m.RoutineFormComponent,
       ),
   },
   {
-    path: 'routine/:id',
+    path: 'routines/create-routine',
     loadComponent: () =>
       import('./features/routines/routine-form/routine-form.component').then(
         (m) => m.RoutineFormComponent,
@@ -36,6 +36,21 @@ export const routes: Routes = [
         (m) => m.RoutinesComponent,
       ),
     title: 'routines',
+  },
+  {
+    path: 'sessions/log-session',
+    loadComponent: () =>
+      import('./features/sessions/session-form/session-form.component').then(
+        (m) => m.SessionFormComponent,
+      ),
+  },
+  {
+    path: 'session/:id',
+    loadComponent: () =>
+      import('./features/sessions/session-form/session-form.component').then(
+        (m) => m.SessionFormComponent,
+      ),
+    title: 'sessions',
   },
   {
     path: 'sessions',

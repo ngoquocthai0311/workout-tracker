@@ -237,7 +237,7 @@ def update_routine(
             else:
                 routine_exercise: RoutineExercise = RoutineExercise(
                     routine=routine,
-                    exercise_id=input_exercise.id,
+                    exercise_id=input_exercise.exercise_id,
                     order=exercise_order + 1,
                     created_at=timestamp,
                     updated_at=timestamp,
@@ -251,7 +251,9 @@ def update_routine(
                         for set_order, input_exercise_set in enumerate(
                             input_exercise.sets
                         )
-                    ],
+                    ]
+                    if input_exercise.sets
+                    else [],
                 )
                 session.add(routine_exercise)
         # remove remaining routine_exercises that do not do any update

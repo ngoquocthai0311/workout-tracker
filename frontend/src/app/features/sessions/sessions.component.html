@@ -6,7 +6,7 @@
     </div>
     <!-- button -->
     <div>
-      <p-button label="Start New Workout" />
+      <p-button (click)="startNewEmptyWorkout()" label="Start New Workout" />
     </div>
     <!-- quick glance of sessions -->
     <div>
@@ -22,7 +22,7 @@
             <p>{{ session.description }}</p>
             <ng-template #footer>
               <div class="flex gap-4 mt-1">
-                <p-button label="Detail" class="w-full" styleClass="w-full" />
+                <p-button (click)="getSessionDetail(session.id)" label="Detail" class="w-full" styleClass="w-full" />
                 <p-button
                   (click)="removeSession(session.id)"
                   label="Remove"

@@ -6,8 +6,8 @@
     </div>
     <!-- buttons -->
     <div>
-      <p-button label="Start Empty Routine" />
-      <p-button label="Create new routine" (click)="showDialog()" />
+      <p-button (click)="startNewWorkoutSession()" label="Start Empty Routine" />
+      <p-button label="Create new routine" (click)="createNewRoutine()" />
     </div>
     <!-- quick glance -->
     <!-- TODO: do @for here  -->
@@ -27,11 +27,12 @@
             <ng-template #footer>
               <div class="flex gap-4 mt-1">
                 <p-button
+                  (click)="startRoutine(routine)"
                   label="Start Routine"
                   class="w-full"
                   styleClass="w-full"
                 />
-                <p-button label="Detail" class="w-full" styleClass="w-full" />
+                <p-button (click)="getRoutineDetail(routine.id)" label="Detail" class="w-full" styleClass="w-full" />
                 <p-button
                   (click)="removeRoutine(routine.id)"
                   label="Remove"

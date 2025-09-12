@@ -1,17 +1,13 @@
-<!-- TODO: using router outlet here with specific name to navigate to correct component -->
-
-<!-- Focus on creating routine / edit routine first -->
 <div class="w-screen">
   <!-- edit/ create routine -->
   <div class="w-4/5 mx-auto">
     <!-- TODO: dynamic create and edit routine -->
     <div class="flex">
-      @if (routine.id) {
-        <div>Edit routine</div>
-        <p-button label="Update" (click)="updateRoutine()" />
+      <div>Session</div>
+      @if (!sessionId) {
+        <p-button label="Save" (click)="saveSession()" />
       } @else {
-        <div>Create routine</div>
-        <p-button label="Create" (click)="createRoutine()" />
+        <p-button label="Update" (click)="updateSession()" />
       }
     </div>
 
@@ -21,7 +17,7 @@
         <div class="flex items-center gap-4 mb-4">
           <label for="username" class="font-semibold w-24">Name</label>
           <input
-            [(ngModel)]="routine.name"
+            [(ngModel)]="session.name"
             pInputText
             id="username"
             class="flex-auto"
@@ -31,7 +27,7 @@
         <div class="flex items-center gap-4 mb-8">
           <label for="email" class="font-semibold w-24">Description</label>
           <input
-            [(ngModel)]="routine.description"
+            [(ngModel)]="session.description"
             pInputText
             id="email"
             class="flex-auto"
@@ -43,7 +39,7 @@
       <!-- list of exercises -->
       <div class="mb-4">
         @for (
-          exercise of routine.exercises;
+          exercise of session.exercises || [];
           track $index;
           let exerciseNumber = $index
         ) {
@@ -88,8 +84,8 @@
                 <ng-template #header>
                   <tr>
                     <th>Set type</th>
-                    <th>Target Weight</th>
-                    <th>Target Reps</th>
+                    <th>Weight</th>
+                    <th>Reps</th>
                     <th></th>
                     <th style="width: 5rem"></th>
                   </tr>
@@ -107,13 +103,15 @@
                     <td>
                       <p-inputnumber
                         inputId="integeronly"
-                        [(ngModel)]="set.targeted_weight"
+                        [(ngModel)]="set.weight_lifted"
+                        [placeholder]="set.targeted_weight"
                       />
                     </td>
                     <td>
                       <p-inputnumber
                         inputId="integeronly"
-                        [(ngModel)]="set.targeted_reps"
+                        [(ngModel)]="set.reps_completed"
+                        [placeholder]="set.targeted_reps"
                       />
                     </td>
                     <td>

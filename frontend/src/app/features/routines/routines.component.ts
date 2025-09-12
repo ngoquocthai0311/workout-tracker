@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { Subject, takeUntil } from 'rxjs';
 import { Routine } from '../../shared/models/models';
 import { ExerciseSummaryPipe } from '../../shared/pipes/exercise-summary.pipe';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-routines',
@@ -25,6 +26,7 @@ import { ExerciseSummaryPipe } from '../../shared/pipes/exercise-summary.pipe';
 export class RoutinesComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
   private destroy$ = new Subject<void>();
+  private router = inject(Router);
 
   public routines: Routine[] = [];
 
@@ -52,6 +54,29 @@ export class RoutinesComponent implements OnInit, OnDestroy {
       .subscribe((_) => {
         this.getRoutines();
       });
+  }
+
+  getRoutineDetail(id?: number) {
+    if (!id) {
+      return;
+    }
+
+    this.router.navigate(['routine', id]);
+  }
+
+  createNewRoutine() {
+    this.router.navigate(['routines', 'create-routine']);
+  }
+
+  startRoutine(routine: Routine) {
+    this.router.navigate(['sessions', 'log-session'], {
+      queryParams: { routine: routine.id },
+      state: { routine: routine },
+    });
+  }
+
+  startNewWorkoutSession() {
+    this.router.navigate(['sessions', 'log-session']);
   }
 
   visible: boolean = false;

@@ -7,11 +7,12 @@ import { RoutineExercise, SessionExercise } from '../models/models';
 export class ExerciseSummaryPipe implements PipeTransform {
   transform(
     exercises: SessionExercise[] | RoutineExercise[] | undefined,
+    filteredData: string = '',
   ): string {
     if (!exercises) {
       return '';
     }
-
+    console.log(exercises);
     let total_exercises: number = 0;
     let total_sets: number = 0;
     exercises.forEach((exercise) => {
@@ -22,6 +23,13 @@ export class ExerciseSummaryPipe implements PipeTransform {
         });
       }
     });
+
+    if (filteredData == 'sets') {
+      return total_sets as unknown as string;
+    } else if (filteredData == 'exercises') {
+      return total_exercises as unknown as string;
+    }
+
     if (!total_exercises && !total_sets) {
       return 'No exercises';
     }

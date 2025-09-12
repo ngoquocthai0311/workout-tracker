@@ -17,6 +17,7 @@ export interface ExerciseSet {
 
 export interface RoutineExercise {
   id?: number;
+  exercise_id?: number;
   name: string;
   description?: string;
   created_at: Date;

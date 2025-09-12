@@ -1,20 +1,34 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 import { Router } from '@angular/router';
+import { Session } from '../../shared/models/models';
+import { ApiService } from '../../core/services/api.service';
+import { Subject, takeUntil } from 'rxjs';
+import { ExerciseSummaryPipe } from '../../shared/pipes/exercise-summary.pipe';
 
 @Component({
   selector: 'app-dashboards',
-  imports: [ButtonModule, CardModule, TableModule, FormsModule, CommonModule],
+  imports: [
+    ButtonModule,
+    CardModule,
+    TableModule,
+    FormsModule,
+    CommonModule,
+    ExerciseSummaryPipe,
+  ],
   templateUrl: './dashboards.component.html',
   styleUrl: './dashboards.component.scss',
 })
-export class DashboardsComponent {
+export class DashboardsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private apiService = inject(ApiService);
+  private destroy$ = new Subject<void>();
 
+  public recentSessions: Session[] = [];
   products!: any[];
 
   selectedProduct!: any;
@@ -86,6 +100,21 @@ export class DashboardsComponent {
         rating: 4,
       },
     ];
+    this.fetchRecentSessions();
+  }
+
+  fetchRecentSessions() {
+    this.apiService
+      .getSessions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.recentSessions = data as Session[];
+        console.log(this.recentSessions);
+      });
+  }
+
+  startNewWorkoutSession() {
+    this.router.navigate(['sessions', 'log-session']);
   }
 
   navigateToRoutines() {
@@ -102,5 +131,10 @@ export class DashboardsComponent {
 
   navigateToReports() {
     this.router.navigate(['reports']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -68,7 +68,7 @@ class SessionExercise(BaseModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    session_id: int = Field(foreign_key="sessions.id")
+    session_id: int = Field(foreign_key="sessions.id", ondelete="CASCADE")
     exercise_id: Optional[int] = Field(default=None, foreign_key="exercises.id")
 
     # order of the exercises within a session
@@ -134,4 +134,6 @@ class WorkoutSession(BaseModel, table=True):
     # Relationships
     user: User = Relationship(back_populates="sessions")
     routine: Routine = Relationship(back_populates="sessions")
-    exercise_links: list[SessionExercise] = Relationship(back_populates="session")
+    exercise_links: list[SessionExercise] = Relationship(
+        back_populates="session", cascade_delete=True
+    )

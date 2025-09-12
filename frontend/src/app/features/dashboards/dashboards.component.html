@@ -6,7 +6,7 @@
     </div>
     <!-- buttons -->
     <div>
-      <p-button label="Start New Workout" />
+      <p-button (click)="startNewWorkoutSession()" label="Start New Workout" />
     </div>
     <!-- quick glance -->
     <div class="grid grid-cols-2 gap-4">
@@ -20,27 +20,23 @@
     <div>
       <p class="w-max mx-auto">Recent activity</p>
       <p-table
-        [value]="products"
-        selectionMode="single"
-        [(selection)]="selectedProduct"
-        [metaKeySelection]="metaKey"
-        dataKey="id"
+        [value]="recentSessions || []"
         [tableStyle]="{ 'min-width': '50rem' }"
       >
         <ng-template #header>
           <tr>
-            <th>Code</th>
             <th>Name</th>
-            <th>Category</th>
-            <th>Quantity</th>
+            <th>Description</th>
+            <th>Total sets</th>
+            <th>Total weight lifted</th>
           </tr>
         </ng-template>
-        <ng-template #body let-product>
-          <tr [pSelectableRow]="product">
-            <td>{{ product.code }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.category }}</td>
-            <td>{{ product.quantity }}</td>
+        <ng-template #body let-session>
+          <tr>
+            <td>{{ session.name }}</td>
+            <td>{{ session.description }}</td>
+            <td>{{ session.exercises | exerciseSummary: "sets" }}</td>
+            <td>{{ session.total_weight }}</td>
           </tr>
         </ng-template>
       </p-table>

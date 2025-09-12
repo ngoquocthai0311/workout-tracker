@@ -109,6 +109,8 @@ def get_total_weights_by_week(
 
     results = session.exec(select(*statements)).one()
 
+    print(results)
+
     return mapper.map_to_weekly_response(results)
 
 

@@ -11,7 +11,7 @@ class WorkoutSessionMapper(BaseResponseMapper):
     def map_list_to_response(self, workout_sessions: Sequence[WorkoutSession]):
         # sort nested session exercises based on exercise number and set number
         for workout_session in workout_sessions:
-            workout_session.sort(key=lambda x: (x.order, x.set_number))
+            workout_session.exercise_links.sort(key=lambda x: (x.order, x.set_number))
 
         results: list[SessionResponse] = []
         for workout_session in workout_sessions:

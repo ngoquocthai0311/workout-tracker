@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, Pipe } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ApiService } from '../../core/services/api.service';
@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Session } from '../../shared/models/models';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ExerciseSummaryPipe } from '../../shared/pipes/exercise-summary.pipe';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sessions',
@@ -16,6 +17,7 @@ import { ExerciseSummaryPipe } from '../../shared/pipes/exercise-summary.pipe';
 export class SessionsComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
   private destroy$ = new Subject<void>();
+  private router = inject(Router);
 
   public sessions: Session[] = [];
 
@@ -43,6 +45,18 @@ export class SessionsComponent implements OnInit, OnDestroy {
         console.log(data);
         this.fetchSession();
       });
+  }
+
+  getSessionDetail(id?: number) {
+    if (!id) {
+      return;
+    }
+
+    this.router.navigate(['/session', id]);
+  }
+
+  startNewEmptyWorkout() {
+    this.router.navigate(['sessions', 'log-session']);
   }
 
   ngOnDestroy(): void {

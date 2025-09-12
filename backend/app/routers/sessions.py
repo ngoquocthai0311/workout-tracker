@@ -49,14 +49,14 @@ def read_sessions(
     dependencies=[Depends(get_db), Depends(get_workout_session_mapper)],
 )
 def get_session(
-    session_id: int,
+    workout_session_id: int,
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
 ):
     workout_session = (
         session.exec(
             select(WorkoutSession)
-            .where(WorkoutSession.id == session_id)
+            .where(WorkoutSession.id == workout_session_id)
             .options(
                 joinedload(WorkoutSession.exercise_links).joinedload(
                     SessionExercise.exercise
@@ -64,7 +64,7 @@ def get_session(
             )
         )
         .unique()
-        .one()
+        .one_or_none()
     )
     if not workout_session:
         raise HTTPException(status_code=404, detail="Workout session not found")
