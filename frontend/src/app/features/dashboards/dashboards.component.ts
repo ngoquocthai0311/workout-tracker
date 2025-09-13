@@ -50,7 +50,6 @@ export class DashboardsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.glance = data as DashboardGlance;
-        console.log(this.glance);
       });
   }
 
@@ -60,7 +59,7 @@ export class DashboardsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.recentSessions = data as Session[];
-        console.log(this.recentSessions);
+        this.recentSessions = this.recentSessions.slice(0, 5);
       });
   }
 

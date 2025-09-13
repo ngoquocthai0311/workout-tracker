@@ -1,0 +1,22 @@
+.screen {
+  background-color: #f7f7f7;
+  .sidebar {
+    padding: 20px;
+    background-color: white;
+    position: absolute;
+    overflow: hidden;
+    z-index: 50;
+  }
+
+  .content {
+    background-color: white;
+    position: relative;
+    z-index: 0;
+    width: 50%;
+    margin: 0 auto;
+  }
+
+  .header {
+    background-color: #4a4a4a;
+  }
+}
