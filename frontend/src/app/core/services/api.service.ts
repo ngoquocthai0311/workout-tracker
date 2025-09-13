@@ -89,4 +89,8 @@ export class ApiService {
   }
 
   // TODO: Add dashboards and users here
+
+  getAGlance(): Observable<object> {
+    return this.http.get(`${this.dashboardsAPI}/glance`);
+  }
 }

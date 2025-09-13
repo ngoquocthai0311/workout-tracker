@@ -3,7 +3,6 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
-import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Subject, takeUntil } from 'rxjs';
 import { Routine } from '../../shared/models/models';
@@ -13,7 +12,6 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-routines',
   imports: [
-    Dialog,
     ButtonModule,
     CardModule,
     ScrollPanelModule,

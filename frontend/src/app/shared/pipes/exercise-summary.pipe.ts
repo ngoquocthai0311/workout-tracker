@@ -12,7 +12,6 @@ export class ExerciseSummaryPipe implements PipeTransform {
     if (!exercises) {
       return '';
     }
-    console.log(exercises);
     let total_exercises: number = 0;
     let total_sets: number = 0;
     exercises.forEach((exercise) => {

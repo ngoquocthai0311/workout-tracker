@@ -59,3 +59,10 @@ export interface SessionExerciseSet {
   weight_lifted?: number | null;
   reps_completed: number | null;
 }
+
+export interface DashboardGlance {
+  total_workouts: number;
+  total_volumes: number;
+  streaks: number;
+  last_workout: string;
+}

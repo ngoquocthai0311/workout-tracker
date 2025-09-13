@@ -10,10 +10,18 @@
     </div>
     <!-- quick glance -->
     <div class="grid grid-cols-2 gap-4">
-      <p-card header="Total workouts"></p-card>
-      <p-card header="Total volume"></p-card>
-      <p-card header="Total Frequent"></p-card>
-      <p-card header="Last Workout"></p-card>
+      <p-card header="Total workouts">
+        <p>{{ glance.total_workouts }}</p>
+      </p-card>
+      <p-card header="Total volume">
+        <p>{{ glance.total_volumes }}</p>
+      </p-card>
+      <p-card header="Total Frequent">
+        <p>{{ glance.streaks }}</p>
+      </p-card>
+      <p-card header="Last Workout">
+        <p>{{ glance.last_workout | date }}</p>
+      </p-card>
     </div>
 
     <!-- recent activity -->
