@@ -8,11 +8,20 @@
     z-index: 50;
   }
 
+  .exercisebar {
+    padding: 20px;
+    background-color: white;
+    position: absolute;
+    right: 0; /* This positions the bar on the right side */
+    top: 0;
+    overflow: hidden;
+    z-index: 100;
+  }
+
   .content {
     background-color: white;
     position: relative;
     z-index: 0;
-    width: 50%;
     margin: 0 auto;
   }
 

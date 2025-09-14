@@ -1,0 +1,9 @@
+.exercisebar {
+  position: absolute;
+  padding: 20px;
+  background-color: white;
+  right: 0; /* This positions the bar on the right side */
+  top: 0;
+  overflow: hidden;
+  z-index: 50;
+}

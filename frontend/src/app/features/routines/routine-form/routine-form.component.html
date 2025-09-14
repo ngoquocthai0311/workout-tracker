@@ -1,23 +1,33 @@
 <!-- TODO: using router outlet here with specific name to navigate to correct component -->
 
 <!-- Focus on creating routine / edit routine first -->
-<div class="w-full">
+<div class="w-full relative">
   <!-- edit/ create routine -->
-  <div class="w-4/5 mx-auto">
-    <!-- TODO: dynamic create and edit routine -->
-    <div class="flex">
+  <div class="mx-auto">
+    <!-- header -->
+    <div class="p-8">
       @if (routine.id) {
-        <div>Edit routine</div>
+        <p class="text-xl w-max mx-auto font-bold">Edit routine</p>
         <p-button label="Update" (click)="updateRoutine()" />
       } @else {
-        <div>Create routine</div>
+        <p class="text-xl w-max mx-auto font-bold">Create routine</p>
         <p-button label="Create" (click)="createRoutine()" />
       }
     </div>
 
     <!-- TODO: drag and drop area -->
-    <div>
-      <div class="w-50">
+    <!--content  -->
+    <div class="w-2/5 mx-auto flex flex-col gap-10">
+      <!-- button -->
+      <div>
+        @if (routine.id) {
+          <p-button [rounded]="true" label="Update" (click)="updateRoutine()" />
+        } @else {
+          <p-button [rounded]="true" label="Create" (click)="createRoutine()" />
+        }
+      </div>
+      <!-- form for name and description of session form -->
+      <div>
         <div class="flex items-center gap-4 mb-4">
           <label for="username" class="font-semibold w-24">Name</label>
           <input
@@ -40,105 +50,108 @@
         </div>
       </div>
 
-      <!-- list of exercises -->
-      <div class="mb-4">
-        @for (
-          exercise of routine.exercises;
-          track $index;
-          let exerciseNumber = $index
-        ) {
-          <p-card>
-            <ng-template #title>
-              {{ exercise.name }}
-            </ng-template>
-            <ng-template #footer>
-              <div class="flex gap-4 mt-1">
-                <p-button
-                  label="Add set"
-                  (click)="addSet(exerciseNumber)"
-                  class="w-full"
-                  styleClass="w-full"
-                />
-                <p-button
-                  (click)="removeExercise(exerciseNumber)"
-                  label="Remove"
-                  severity="secondary"
-                  class="w-full"
-                  [outlined]="true"
-                  styleClass="w-full"
-                />
-              </div>
-            </ng-template>
-            <div class="flex items-center gap-4 mb-4">
-              <label for="username" class="font-semibold w-24">Note</label>
-              <input
-                [(ngModel)]="exercise.description"
-                pInputText
-                id="username"
-                class="flex-auto"
-                autocomplete="off"
-              />
-            </div>
-            <!-- list of sets -->
-            <div>
-              <p-table
-                [value]="exercise.sets || []"
-                [tableStyle]="{ 'min-width': '50rem' }"
-              >
-                <ng-template #header>
-                  <tr>
-                    <th>Set type</th>
-                    <th>Target Weight</th>
-                    <th>Target Reps</th>
-                    <th></th>
-                    <th style="width: 5rem"></th>
-                  </tr>
+      <!-- list of routine exercises -->
+      @if (routine.exercises) {
+        <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
+          <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
+            @for (
+              exercise of routine.exercises;
+              track $index;
+              let exerciseNumber = $index
+            ) {
+              <p-card>
+                <ng-template #title>
+                  {{ exercise.name }}
                 </ng-template>
-                <ng-template #body let-set let-setIndex="rowIndex">
-                  <tr>
-                    <td>
-                      <input
-                        type="text"
-                        [(ngModel)]="set.set_type"
-                        pInputText
-                        placeholder="Search"
-                      />
-                    </td>
-                    <td>
-                      <p-inputnumber
-                        inputId="integeronly"
-                        [(ngModel)]="set.targeted_weight"
-                      />
-                    </td>
-                    <td>
-                      <p-inputnumber
-                        inputId="integeronly"
-                        [(ngModel)]="set.targeted_reps"
-                      />
-                    </td>
-                    <td>
-                      <p-button
-                        (click)="removeSet(setIndex, exercise.id)"
-                        icon="pi pi-trash"
-                        severity="secondary"
-                        rounded
-                      />
-                    </td>
-                  </tr>
+                <ng-template #footer>
+                  <div class="flex gap-4 mt-1">
+                    <p-button
+                      label="Add set"
+                      (click)="addSet(exerciseNumber)"
+                      class="w-full"
+                      styleClass="w-full"
+                    />
+                    <p-button
+                      (click)="removeExercise(exerciseNumber)"
+                      label="Remove"
+                      severity="secondary"
+                      class="w-full"
+                      [outlined]="true"
+                      styleClass="w-full"
+                    />
+                  </div>
                 </ng-template>
-              </p-table>
-            </div>
-          </p-card>
-        }
-      </div>
+                <div class="flex items-center gap-4 mb-4">
+                  <label for="username" class="font-semibold w-24">Note</label>
+                  <input
+                    [(ngModel)]="exercise.description"
+                    pInputText
+                    id="username"
+                    class="flex-auto"
+                    autocomplete="off"
+                  />
+                </div>
+                <!-- list of sets -->
+                <div>
+                  <p-table
+                    [value]="exercise.sets || []"
+                    [tableStyle]="{ 'min-width': '50rem' }"
+                  >
+                    <ng-template #header>
+                      <tr>
+                        <th>Set type</th>
+                        <th>Target Weight</th>
+                        <th>Target Reps</th>
+                        <th></th>
+                        <th style="width: 5rem"></th>
+                      </tr>
+                    </ng-template>
+                    <ng-template #body let-set let-setIndex="rowIndex">
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            [(ngModel)]="set.set_type"
+                            pInputText
+                            placeholder="Search"
+                          />
+                        </td>
+                        <td>
+                          <p-inputnumber
+                            inputId="integeronly"
+                            [(ngModel)]="set.targeted_weight"
+                          />
+                        </td>
+                        <td>
+                          <p-inputnumber
+                            inputId="integeronly"
+                            [(ngModel)]="set.targeted_reps"
+                          />
+                        </td>
+                        <td>
+                          <p-button
+                            (click)="removeSet(setIndex, exercise.id)"
+                            icon="pi pi-trash"
+                            severity="secondary"
+                            rounded
+                          />
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                </div>
+              </p-card>
+            }
+          </p-scrollpanel>
+        </div>
+      }
     </div>
   </div>
 
   <!-- add exercise -->
-  <div class="w-4/5 mx-auto">
-    <div class="flex">
-      <p>Library</p>
-      <!-- TODO: add new  -->
+  <div class="h-screen exercisebar flex flex-col gap-4">
+    <div>
+      <p class="w-max font-bold">Library</p>
     </div>
     <p-iconfield>
       <p-inputicon styleClass="pi pi-search" />
@@ -150,30 +163,31 @@
       />
     </p-iconfield>
     <p-button (click)="createExercise()" label="Create new exercise" rounded />
-    <p-divider />
     <!-- list all exercises -->
     <div>
-      <p>All exercises</p>
-      <div>
-        <p-table
-          [value]="filteredExercises"
-          [tableStyle]="{ 'min-width': '50rem' }"
-        >
-          <ng-template #body let-exercise>
-            <tr>
-              <td>
-                <p-button
-                  (click)="addExercise(exercise.id)"
-                  icon="pi pi-plus"
-                  severity="secondary"
-                  rounded
-                />
-              </td>
-              <td>{{ exercise.name }}</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
+      <p-divider />
+      <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
+        <div>
+          <p-table
+            [value]="filteredExercises"
+            [tableStyle]="{ 'min-width': '40vh' }"
+          >
+            <ng-template #body let-exercise>
+              <tr>
+                <td>
+                  <p-button
+                    (click)="addExercise(exercise.id)"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    rounded
+                  />
+                </td>
+                <td>{{ exercise.name }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-scrollpanel>
     </div>
   </div>
 </div>

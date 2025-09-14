@@ -26,6 +26,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-session-form',
@@ -41,12 +43,14 @@ import { Dialog } from 'primeng/dialog';
     InputTextModule,
     InputNumberModule,
     ReactiveFormsModule,
+    ScrollPanelModule,
   ],
   templateUrl: './session-form.component.html',
   styleUrl: './session-form.component.scss',
 })
 export class SessionFormComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
@@ -58,14 +62,10 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   public filteredExercises: Exercise[] = [];
   public session: Session = {} as Session;
   public visible: boolean = false;
-
   public createExerciseFormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
   });
-
-  products!: any[];
-  selectedProduct!: any;
 
   metaKey: boolean = true;
 
@@ -89,25 +89,12 @@ export class SessionFormComponent implements OnInit, OnDestroy {
         this.session.exercises = [];
         this.session.name = this.routine.name;
         this.session.description = this.routine.description;
-        this.routine.exercises?.forEach(
-          (routineExercise: RoutineExercise, index: number) => {
-            // let sessionExerciseSets: SessionExerciseSet[] =
-            //   [] as SessionExerciseSet[];
-
-            // for (const routineExerciseSet of routineExercise.sets || []) {
-            //   sessionExerciseSets.push({
-            //     set_type: routineExerciseSet.set_type,
-            //     weight_lifted: routineExerciseSet.,
-            //     reps_completed: routineExerciseSet.reps_completed,
-            //   } as SessionExerciseSet);
-            // }
-            this.session.exercises?.push({
-              id: routineExercise.exercise_id,
-              sets: routineExercise.sets as unknown as SessionExerciseSet[],
-            } as SessionExercise);
-          },
-          console.log(this.session),
-        );
+        this.routine.exercises?.forEach((routineExercise: RoutineExercise) => {
+          this.session.exercises?.push({
+            id: routineExercise.exercise_id,
+            sets: routineExercise.sets as unknown as SessionExerciseSet[],
+          } as SessionExercise);
+        }, console.log(this.session));
       } else if (this.routine.id !== this.routineId) {
         // TODO: Add pop up to say the data is not valid
         this.router.navigate(['routines']);
@@ -223,6 +210,7 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .getExercises()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
+        this.toastService.showSuccess('fetch successfully');
         this.exercises = data as Exercise[];
         this.filteredExercises = this.exercises;
       });

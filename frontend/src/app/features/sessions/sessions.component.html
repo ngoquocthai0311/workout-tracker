@@ -1,11 +1,11 @@
-<div class="w-full">
+<div class="w-full relative">
   <div class="mx-auto">
     <!-- header -->
     <div class="p-8">
       <p class="text-xl w-max mx-auto font-bold">Routines</p>
     </div>
     <!-- content -->
-    <div class="w-4/5 mx-auto flex flex-col gap-10">
+    <div class="w-2/5 mx-auto flex flex-col gap-10">
       <!-- button -->
       <div>
         <p-button
@@ -16,7 +16,7 @@
       </div>
       <!-- quick glance of sessions -->
       <div class="outline-2 outline-offset-2 outline-dashed">
-        <p-scrollpanel [style]="{ width: '100%', height: '500px' }">
+        <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
           @for (session of sessions; track session.id) {
             <p-card>
               <ng-template #title>

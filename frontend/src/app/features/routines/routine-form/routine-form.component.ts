@@ -24,6 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
 
 @Component({
   selector: 'app-routine-form',
@@ -39,6 +40,7 @@ import { Dialog } from 'primeng/dialog';
     InputTextModule,
     InputNumberModule,
     ReactiveFormsModule,
+    ScrollPanelModule,
   ],
   templateUrl: './routine-form.component.html',
   styleUrl: './routine-form.component.scss',

@@ -1,18 +1,16 @@
 import { Component } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
-import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterModule, RouterOutlet, MenuModule, ScrollPanelModule],
+  imports: [Toast, RouterModule, RouterOutlet, ScrollPanelModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'frontend';
-  items: MenuItem[] | undefined;
 
   ngOnInit() {}
 }
