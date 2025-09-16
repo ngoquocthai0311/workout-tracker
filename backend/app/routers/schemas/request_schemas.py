@@ -27,7 +27,7 @@ class CreateExerciseRequest(SQLModel):
 class UpdateExerciseRequest(SQLModel):
     name: str
     description: Optional[str] = None
-    user_id: Optional[int]
+    user_id: Optional[int] = 1
 
 
 # endregion
@@ -67,7 +67,7 @@ class UpdateRoutineRequest(SQLModel):
     name: str
     description: Optional[str] = None
     exercises: Optional[list[RoutineExerciseRequest]] = None
-    user_id: int
+    user_id: int = 1
 
 
 # endregion
@@ -91,6 +91,7 @@ class CreateWorkoutSessionRequest(SQLModel):
     description: Optional[str] = None
     routine_id: Optional[int] = None
     exercises: Optional[list[RoutineExerciseRequest]] = None
+    duration: Optional[int] = None
     user_id: int = 1  # Default to user_id 1 for simplicity, can be changed later
     notes: Optional[str] = None
 
@@ -113,7 +114,8 @@ class UpdateWorkoutSessionRequest(SQLModel):
     description: Optional[str] = None
     routine_id: Optional[int] = None
     exercises: Optional[list[RoutineExerciseRequest]] = None
-    user_id: int = None
+    duration: Optional[int] = None
+    user_id: int = 1
     notes: Optional[str] = None
 
 

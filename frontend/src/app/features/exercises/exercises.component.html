@@ -39,7 +39,16 @@
                 <ng-template #subtitle>
                   {{ exercise.description }}
                 </ng-template>
-                <p>Personal Best: {{ exercise.max_weight || 0 }} kg</p>
+                @if (exercise.personal_record) {
+                  <p>
+                    Personal Best:
+                    {{ exercise.personal_record.weight || 0 }} kg
+                  </p>
+                  <p>
+                    Achieved on:
+                    {{ exercise.personal_record.updated_at | date }}
+                  </p>
+                }
                 <ng-template #footer>
                   <div class="flex gap-4 mt-1">
                     <p-button

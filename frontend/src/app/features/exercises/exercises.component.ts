@@ -11,6 +11,7 @@ import { ApiService } from '../../core/services/api.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Exercise } from '../../shared/models/models';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-exercises',
@@ -24,6 +25,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
     InputTextModule,
     FormsModule,
     ReactiveFormsModule,
+    DatePipe,
   ],
   templateUrl: './exercises.component.html',
   styleUrl: './exercises.component.scss',
@@ -68,8 +70,7 @@ export class ExercisesComponent {
     this.apiService
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        console.log(data);
+      .subscribe(() => {
         this.visible = false;
         this.createExerciseFormGroup.reset();
         this.fetchExercises();
@@ -83,7 +84,6 @@ export class ExercisesComponent {
       .subscribe((data) => {
         this.exercises = data as Exercise[];
         this.filteredExercises = this.exercises;
-        console.log(this.exercises);
       });
   }
 

@@ -30,6 +30,11 @@ class RoutineMapper(BaseResponseMapper):
                 exercise.exercise_id = exercise.id
                 exercise.id = exercise_link.id
                 exercise.sets = exercise_link.routine_exercise_sets
+                exercise.personal_best = (
+                    exercise_link.exercise.max_weight.weight
+                    if exercise_link.exercise.max_weight
+                    else None
+                )
                 exercises.append(exercise)
 
             routine_response.exercises = exercises

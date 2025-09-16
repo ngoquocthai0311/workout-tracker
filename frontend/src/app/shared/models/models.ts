@@ -4,8 +4,14 @@ export interface Exercise {
   description?: string;
   created_at?: Date;
   updated_at?: Date;
-  max_weight?: number;
+  personal_record?: MaxWeightRecord;
   user_id?: number;
+}
+
+export interface MaxWeightRecord {
+  weight?: number;
+  notes?: string;
+  updated_at?: Date;
 }
 
 export interface ExerciseSet {
@@ -40,6 +46,7 @@ export interface Session {
   id: number;
   name?: string | null;
   description?: string | null;
+  duration?: number;
   created_at: Date;
   updated_at?: Date | null;
   notes?: string | null;

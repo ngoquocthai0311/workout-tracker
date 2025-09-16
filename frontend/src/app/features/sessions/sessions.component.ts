@@ -42,7 +42,6 @@ export class SessionsComponent implements OnInit, OnDestroy {
       .removeSessionById(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        console.log(data);
         this.fetchSession();
       });
   }

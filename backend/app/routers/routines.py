@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, Response
 from sqlmodel import Session, select
 from sqlalchemy.orm import joinedload
 
-from app.database.models import Routine, RoutineExercise, RoutineExerciseSet
+from app.database.models import Routine, RoutineExercise, RoutineExerciseSet, Exercise
 from app.routers.schemas.request_schemas import (
     CreateRoutineRequest,
     UpdateRoutineRequest,
@@ -29,8 +29,11 @@ def read_routines(
     routines = (
         session.exec(
             select(Routine).options(
-                joinedload(Routine.exercise_links).joinedload(
-                    RoutineExercise.routine_exercise_sets
+                joinedload(Routine.exercise_links).options(
+                    joinedload(RoutineExercise.routine_exercise_sets),
+                    joinedload(RoutineExercise.exercise).joinedload(
+                        Exercise.max_weight
+                    ),
                 )
             )
         )
@@ -55,8 +58,9 @@ def get_routine(
         select(Routine)
         .where(Routine.id == routine_id)
         .options(
-            joinedload(Routine.exercise_links).joinedload(
-                RoutineExercise.routine_exercise_sets
+            joinedload(Routine.exercise_links).options(
+                joinedload(RoutineExercise.routine_exercise_sets),
+                joinedload(RoutineExercise.exercise).joinedload(Exercise.max_weight),
             )
         )
     ).first()

@@ -22,12 +22,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DividerModule } from 'primeng/divider';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { Subject, takeUntil } from 'rxjs';
+import { interval, Subject, Subscription, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ToastService } from '../../../core/services/toast.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-session-form',
@@ -44,6 +45,7 @@ import { ToastService } from '../../../core/services/toast.service';
     InputNumberModule,
     ReactiveFormsModule,
     ScrollPanelModule,
+    DatePipe,
   ],
   templateUrl: './session-form.component.html',
   styleUrl: './session-form.component.scss',
@@ -54,6 +56,7 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
+  private timer: Subscription | null = null;
   private routineId: number = 0;
   private routine: Routine = {} as Routine;
 
@@ -66,6 +69,7 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
   });
+  public counter: number = 0;
 
   metaKey: boolean = true;
 
@@ -92,9 +96,11 @@ export class SessionFormComponent implements OnInit, OnDestroy {
         this.routine.exercises?.forEach((routineExercise: RoutineExercise) => {
           this.session.exercises?.push({
             id: routineExercise.exercise_id,
+            name: routineExercise.name,
+            description: routineExercise.description,
             sets: routineExercise.sets as unknown as SessionExerciseSet[],
           } as SessionExercise);
-        }, console.log(this.session));
+        });
       } else if (this.routine.id !== this.routineId) {
         // TODO: Add pop up to say the data is not valid
         this.router.navigate(['routines']);
@@ -104,13 +110,38 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       this.sessionId = this.route.snapshot.paramMap.get(
         'id',
       ) as unknown as number;
-      // this.sessionId = this.router.url.split('/').pop() as unknown as number;
-      // check for
-      console.log(this.sessionId);
       this.fetchSession();
     }
-    console.log(this.routine);
     this.fetchExercises();
+
+    // trigger time counting for logging session
+    if (!this.sessionId) {
+      this.triggerCounting();
+    }
+  }
+
+  triggerCounting() {
+    this.timer = interval(1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // milliseconds
+        if (this.session.duration) {
+          this.session.duration += 1000;
+        } else {
+          this.session.duration = 1000;
+        }
+
+        this.counter = this.session.duration;
+      });
+  }
+
+  resumeOrPauseCounting() {
+    if (this.timer) {
+      this.timer.unsubscribe();
+      this.timer = null;
+    } else {
+      this.triggerCounting();
+    }
   }
 
   updateSession() {
@@ -123,12 +154,14 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   }
 
   saveSession() {
+    // pause timer
+    this.timer?.unsubscribe();
+
     this.apiService
       .createSession(this.session)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         // redirect to routines
-        console.log(data);
         this.router.navigate(['/sessions']);
       });
   }
@@ -143,12 +176,10 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.session = data as Session;
-        console.log(this.session);
       });
   }
 
   removeSet(setIndex: number, exerciseId?: number) {
-    console.log(exerciseId, setIndex);
     if (!exerciseId) {
       this.fetchSession();
       return;
@@ -196,7 +227,6 @@ export class SessionFormComponent implements OnInit, OnDestroy {
         id: exercise.id,
       } as SessionExercise);
     }
-    console.log(this.session);
   }
 
   removeExercise(exerciseNumber: number) {
@@ -236,7 +266,6 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        console.log(data);
         this.visible = false;
         this.createExerciseFormGroup.reset();
         this.fetchExercises();

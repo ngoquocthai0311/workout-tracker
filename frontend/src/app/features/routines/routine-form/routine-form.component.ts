@@ -79,7 +79,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
   }
 
   updateRoutine() {
-    // console.log(this.routine);
     this.apiService
       .updateRoutineById(this.routineId, this.routine)
       .pipe(takeUntil(this.destroy$))
@@ -94,7 +93,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         // redirect to routines
-        console.log(data);
         this.router.navigate(['/routines']);
       });
   }
@@ -129,7 +127,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        console.log(data);
         this.visible = false;
         this.createExerciseFormGroup.reset();
         this.fetchExercises();
@@ -158,12 +155,10 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.routine = data as Routine;
-        console.log(this.routine);
       });
   }
 
   removeSet(setIndex: number, exerciseId?: number) {
-    console.log(exerciseId, setIndex);
     if (!exerciseId) {
       this.fetchRoutine();
       return;
@@ -192,8 +187,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
         targeted_reps: 0,
       } as ExerciseSet);
     }
-
-    console.log(this.routine);
   }
 
   addExercise(exerciseId?: number) {
@@ -216,8 +209,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
         id: null as unknown,
       } as RoutineExercise);
     }
-
-    console.log(this.routine);
   }
 
   removeExercise(exerciseNumber: number) {
@@ -230,9 +221,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     this.apiService
       .removeRoutineById(this.routineId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((message) => {
-        console.log(message);
-      });
+      .subscribe((message) => {});
   }
 
   ngOnDestroy(): void {

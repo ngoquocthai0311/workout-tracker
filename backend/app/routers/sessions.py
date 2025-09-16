@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, Response
 from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
 
-from app.database.models import SessionExercise, WorkoutSession
+from app.database.models import SessionExercise, WorkoutSession, MaxWeightRecord
 from app.routers.schemas.request_schemas import (
     CreateWorkoutSessionRequest,
     UpdateWorkoutSessionRequest,
@@ -91,6 +91,7 @@ def create_session(
         routine_id=input.routine_id,
         created_at=timestamp,
         notes=input.notes,
+        duration=input.duration,
     )
     session.add(workout_session)
 
@@ -100,6 +101,10 @@ def create_session(
             exercise_details: CreateWorkoutSessionRequest.RoutineExerciseRequest = (
                 exercise
             )
+
+            # ignore empty sets
+            if not exercise_details.sets:
+                continue
 
             # add each performed set of an exercise to become an session exercise
             for set_index, set in enumerate(exercise_details.sets):
@@ -115,8 +120,32 @@ def create_session(
                     reps_completed=exercise_set.reps_completed,
                     created_at=timestamp,
                 )
-
                 session.add(workout_session_exercise)
+
+                max_weight = (
+                    workout_session_exercise.exercise.max_weight
+                    if workout_session_exercise.exercise
+                    else None
+                )
+                # check if the exercise set performed has best records
+                if max_weight:
+                    if max_weight.weight < exercise_set.weight_lifted:
+                        workout_session_exercise.exercise.max_weight.weight = (
+                            exercise_set.weight_lifted
+                        )
+                        workout_session_exercise.exercise.max_weight.updated_at = (
+                            timestamp
+                        )
+                        workout_session_exercise.exercise.max_weight.session_exercise = workout_session_exercise
+                else:
+                    max_weight = MaxWeightRecord(
+                        user_id=input.user_id,
+                        exercise_id=exercise_details.id,
+                        weight=exercise_set.weight_lifted,
+                        updated_at=timestamp,
+                        session_exercise=workout_session_exercise,
+                    )
+                    session.add(max_weight)
 
     session.commit()
     session.refresh(workout_session)
@@ -178,6 +207,10 @@ def update_session(
         workout_session.user_id = input.user_id
         is_edited = True
 
+    if input.duration:
+        workout_session.user_id = input.user_id
+        is_edited = True
+
     if input.exercises and len(input.exercises) > 0:
         is_edited = True
 
@@ -230,9 +263,55 @@ def update_session(
 
                 session.add(workout_session_exercise)
 
-            # remove remaining session_exercises
-            for removed_session_exercises in session_exercises.values():
-                session.delete(removed_session_exercises)
+                max_weight = (
+                    workout_session_exercise.exercise.max_weight
+                    if workout_session_exercise.exercise
+                    else None
+                )
+                # check if the exercise set performed has best records
+                if max_weight:
+                    if max_weight.weight < exercise_set.weight_lifted:
+                        workout_session_exercise.exercise.max_weight.weight = (
+                            exercise_set.weight_lifted
+                        )
+                        workout_session_exercise.exercise.max_weight.updated_at = (
+                            timestamp
+                        )
+                        workout_session_exercise.exercise.max_weight.session_exercise = workout_session_exercise
+                else:
+                    max_weight = MaxWeightRecord(
+                        user_id=input.user_id,
+                        exercise_id=exercise_details.id,
+                        weight=exercise_set.weight_lifted,
+                        updated_at=timestamp,
+                        session_exercise=workout_session_exercise,
+                    )
+                    session.add(max_weight)
+        # remove remaining session_exercises
+        for removed_session_exercises in session_exercises.values():
+            # update max_weight if possible
+            if removed_session_exercises.max_weight:
+                max_weight = removed_session_exercises.max_weight
+                if max_weight:
+                    session.delete(max_weight)
+                    # find updated session to fill in
+                    new_best_exercise_session = session.exec(
+                        select(SessionExercise)
+                        .where(
+                            SessionExercise.id != removed_session_exercises.id,
+                            SessionExercise.exercise_id
+                            == removed_session_exercises.exercise_id,
+                        )
+                        .order_by(SessionExercise.created_at.desc())
+                        .limit(1)
+                    ).one()
+
+                    if new_best_exercise_session:
+                        max_weight.session_exercise_id = new_best_exercise_session.id
+                        max_weight.weight = new_best_exercise_session.weight_lifted
+                        max_weight.updated_at = timestamp
+
+            session.delete(removed_session_exercises)
 
     if is_edited:
         workout_session.updated_at = timestamp

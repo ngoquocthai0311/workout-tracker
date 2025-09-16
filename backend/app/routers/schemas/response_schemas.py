@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pydantic import RootModel
 from sqlmodel import SQLModel
 from typing import Optional
@@ -10,7 +11,13 @@ class ExerciseResponse(SQLModel):
     description: Optional[str] = None
     created_at: float
     updated_at: float
-    max_weight: Optional[int] = None
+    personal_record: Optional["MaxWeightResponse"] = None
+
+
+class MaxWeightResponse(SQLModel):
+    weight: Optional[Decimal] = None
+    notes: Optional[str]
+    updated_at: Optional[float] = None
 
 
 # endregion
@@ -21,7 +28,7 @@ class ExerciseSetResponse(SQLModel):
     id: Optional[int] = None
     routine_exercise_id: Optional[int] = None
     set_type: str
-    targeted_weight: int
+    targeted_weight: Decimal
     targeted_reps: int
 
 
@@ -32,7 +39,7 @@ class RoutineExerciseResponse(SQLModel):
     description: Optional[str] = None
     created_at: float
     updated_at: float
-    max_weight: Optional[int] = None
+    personal_best: Optional[Decimal] = None
     sets: list["ExerciseSetResponse"] = None
 
 
@@ -54,6 +61,7 @@ class SessionResponse(SQLModel):
     id: int
     name: Optional[str] = None
     description: Optional[str] = None
+    duration: Optional[int] = None
     created_at: float
     updated_at: Optional[float] = None
     notes: Optional[str] = None
@@ -67,7 +75,7 @@ class SessionExerciseResponse(SQLModel):
     class SessionExerciseSetResponse(SQLModel):
         id: Optional[int] = 0
         set_type: Optional[str] = "normal"
-        weight_lifted: Optional[int] = 0
+        weight_lifted: Optional[Decimal] = 0
         reps_completed: Optional[int] = 0
 
     id: int

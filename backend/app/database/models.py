@@ -2,6 +2,8 @@ from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from decimal import Decimal
+
 
 class BaseModel(SQLModel):
     pass
@@ -20,6 +22,9 @@ class User(BaseModel, table=True):
     exercises: Optional[list["Exercise"]] = Relationship(back_populates="user")
     routines: Optional[list["Routine"]] = Relationship(back_populates="user")
     sessions: Optional[list["WorkoutSession"]] = Relationship(back_populates="user")
+    max_weights: Optional[list["MaxWeightRecord"]] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 class RoutineExercise(BaseModel, table=True):
@@ -54,8 +59,8 @@ class RoutineExerciseSet(BaseModel, table=True):
     )
     set_number: int = Field(default=1)
     set_type: str = Field(default="normal")
-    targeted_weight: int = Field(default=0)
-    targeted_reps: int = Field(default=0)
+    targeted_weight: Optional[Decimal] = Field(default=0, decimal_places=2)
+    targeted_reps: Optional[int] = Field(default=0)
 
     # Relationships
     routine_exercise: RoutineExercise = Relationship(
@@ -76,13 +81,14 @@ class SessionExercise(BaseModel, table=True):
     # set number is used with exercise id when an exercise is added during a session
     set_type: Optional[str] = Field(default="normal")
     set_number: int = Field(default=1)
-    weight_lifted: int = Field(default=0)
-    reps_completed: int = Field(default=0)
+    weight_lifted: Optional[Decimal] = Field(default=0, decimal_places=2)
+    reps_completed: Optional[int] = Field(default=0)
     created_at: float
 
     # Relationships
     session: "WorkoutSession" = Relationship(back_populates="exercise_links")
     exercise: "Exercise" = Relationship(back_populates="session_links")
+    max_weight: "MaxWeightRecord" = Relationship(back_populates="session_exercise")
 
 
 class Exercise(BaseModel, table=True):
@@ -93,10 +99,13 @@ class Exercise(BaseModel, table=True):
     description: Optional[str]
     created_at: float
     updated_at: float
-    user_id: int = Field(foreign_key="users.id")
+    user_id: Optional[int] = Field(default=None, foreign_key="users.id")
 
     # Relationships
     user: User = Relationship(back_populates="exercises")
+    max_weight: "MaxWeightRecord" = Relationship(
+        back_populates="exercise", cascade_delete=True
+    )
     routine_links: list[RoutineExercise] = Relationship(back_populates="exercise")
     session_links: list[SessionExercise] = Relationship(back_populates="exercise")
 
@@ -128,6 +137,7 @@ class WorkoutSession(BaseModel, table=True):
     user_id: Optional[int] = Field(default=None, foreign_key="users.id")
     routine_id: Optional[int] = Field(default=None, foreign_key="routines.id")
     created_at: float
+    duration: Optional[int] = Field(default=0)
     updated_at: Optional[float] = Field(default=None)
     notes: Optional[str]
 
@@ -137,3 +147,26 @@ class WorkoutSession(BaseModel, table=True):
     exercise_links: list[SessionExercise] = Relationship(
         back_populates="session", cascade_delete=True
     )
+
+
+class MaxWeightRecord(BaseModel, table=True):
+    __tablename__ = "max_weights"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(
+        default=None, foreign_key="users.id", ondelete="CASCADE"
+    )
+    exercise_id: Optional[int] = Field(
+        default=None, foreign_key="exercises.id", ondelete="CASCADE"
+    )
+    session_exercise_id: Optional[int] = Field(
+        default=None, foreign_key="sessions_exercises.id", ondelete="CASCADE"
+    )
+    weight: Optional[Decimal] = Field(default=0, decimal_places=2)
+    notes: Optional[str]
+    updated_at: Optional[float] = Field(default=None)
+
+    # Relationships
+    user: User = Relationship(back_populates="max_weights")
+    exercise: Exercise = Relationship(back_populates="max_weight")
+    session_exercise: SessionExercise = Relationship(back_populates="max_weight")

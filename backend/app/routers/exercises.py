@@ -3,8 +3,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse, Response
 from sqlmodel import Session, select
+from sqlalchemy.orm import joinedload
 
-from app.database.models import Exercise, SessionExercise
+from app.database.models import Exercise
 from app.routers.schemas.request_schemas import (
     CreateExerciseRequest,
     UpdateExerciseRequest,
@@ -25,7 +26,9 @@ def read_exercises(
     mapper: ExerciseMapper = Depends(get_exercise_mapper),
     session: Session = Depends(get_db),
 ):
-    exercises = session.exec(select(Exercise)).all()
+    exercises = session.exec(
+        select(Exercise).options(joinedload(Exercise.max_weight))
+    ).all()
 
     return mapper.map_list_to_response(exercises)
 
@@ -37,25 +40,18 @@ def read_exercises(
 )
 def get_exercise(
     exercise_id: int,
-    max_weight: bool = False,
     mapper: ExerciseMapper = Depends(get_exercise_mapper),
     session: Session = Depends(get_db),
 ):
-    exercise = session.get(Exercise, exercise_id)
+    exercise = session.exec(
+        select(Exercise)
+        .where(Exercise.id == exercise_id)
+        .options(joinedload(Exercise.max_weight))
+    ).one()
     if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
-    max_weight = None
-    if max_weight:
-        exercise_session = session.exec(
-            select(SessionExercise)
-            .where(SessionExercise.exercise_id == exercise_id)
-            .order_by(SessionExercise.weight_lifted.desc())
-            .limit(1)
-        ).one()
 
-        max_weight = exercise_session.weight_lifted
-
-    return mapper.transform_to_response(exercise=exercise, max_weight=max_weight)
+    return mapper.transform_to_response(exercise=exercise)
 
 
 @router.post(
@@ -76,6 +72,7 @@ def create_exercise(
         updated_at=timestamp,
         user_id=input.user_id,
     )
+
     session.add(exercise)
     session.commit()
     session.refresh(exercise)
