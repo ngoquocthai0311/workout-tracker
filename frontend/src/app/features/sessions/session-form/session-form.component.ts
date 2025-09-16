@@ -29,6 +29,12 @@ import { Dialog } from 'primeng/dialog';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ToastService } from '../../../core/services/toast.service';
 import { DatePipe } from '@angular/common';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDropList,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-session-form',
@@ -46,6 +52,8 @@ import { DatePipe } from '@angular/common';
     ReactiveFormsModule,
     ScrollPanelModule,
     DatePipe,
+    CdkDrag,
+    CdkDropList,
   ],
   templateUrl: './session-form.component.html',
   styleUrl: './session-form.component.scss',
@@ -118,6 +126,25 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     if (!this.sessionId) {
       this.triggerCounting();
     }
+  }
+
+  dropExercise(event: CdkDragDrop<SessionExercise[]>) {
+    moveItemInArray(
+      this.session.exercises || [],
+      event.previousIndex,
+      event.currentIndex,
+    );
+  }
+
+  dropSet(
+    event: CdkDragDrop<SessionExerciseSet[]>,
+    exerciseSets: SessionExerciseSet[] = [],
+  ) {
+    moveItemInArray(
+      exerciseSets || [],
+      event.previousIndex,
+      event.currentIndex,
+    );
   }
 
   triggerCounting() {

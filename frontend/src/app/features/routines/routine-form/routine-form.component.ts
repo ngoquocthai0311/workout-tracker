@@ -25,6 +25,12 @@ import { Router } from '@angular/router';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDropList,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-routine-form',
@@ -41,6 +47,8 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
     InputNumberModule,
     ReactiveFormsModule,
     ScrollPanelModule,
+    CdkDrag,
+    CdkDropList,
   ],
   templateUrl: './routine-form.component.html',
   styleUrl: './routine-form.component.scss',
@@ -76,6 +84,22 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       this.fetchRoutine();
     }
     this.fetchExercises();
+  }
+
+  dropExercise(event: CdkDragDrop<RoutineExercise[]>) {
+    moveItemInArray(
+      this.routine.exercises || [],
+      event.previousIndex,
+      event.currentIndex,
+    );
+  }
+
+  dropSet(event: CdkDragDrop<ExerciseSet[]>, exerciseSets: ExerciseSet[] = []) {
+    moveItemInArray(
+      exerciseSets || [],
+      event.previousIndex,
+      event.currentIndex,
+    );
   }
 
   updateRoutine() {
