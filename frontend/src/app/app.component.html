@@ -1,7 +1,7 @@
-<div class="screen relative h-screen w-screen">
+<div class="desktop-screen relative h-screen w-screen">
   <!-- side bar -->
-  <div class="w-48 h-full sidebar">
-    <div>
+  <div class="sidebar">
+    <div class="w-48 h-full">
       <div class="h-24 flex justify-center">
         <div>
           <b>Workout Tracker</b>
@@ -16,9 +16,48 @@
         <a [routerLink]="['reports']">Reports</a>
       </div>
     </div>
-    <!-- items -->
-    <div>
-      <!-- navigation -->
+  </div>
+  <div class="headbar">
+    <div class="w-full h-full flex items-center justify-between">
+      <p-button
+        (click)="visibleSideBar = true"
+        class="p-3"
+        icon="pi pi-align-justify"
+        variant="text"
+        rounded
+      />
+      <p-button
+        (click)="visibleSideBar = false"
+        class="p-3"
+        icon="pi pi-home"
+        variant="text"
+        rounded
+        [routerLink]="['']"
+      />
+    </div>
+
+    <!-- side bar drawer for mobile -->
+    <div class="card flex justify-center">
+      <p-drawer [(visible)]="visibleSideBar" header="workout tracker">
+        <div class="w-48 h-full">
+          <!-- items -->
+          <div class="flex flex-col justify-center gap-6">
+            <a (click)="visibleSideBar = false" [routerLink]="['']">Home</a>
+            <a (click)="visibleSideBar = false" [routerLink]="['routines']"
+              >Routines</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['sessions']"
+              >Sessions</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['exercises']"
+              >Exercises</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['reports']"
+              >Reports</a
+            >
+          </div>
+        </div>
+      </p-drawer>
     </div>
   </div>
   <!-- content -->
