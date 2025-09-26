@@ -10,9 +10,9 @@ class ExerciseMapper(BaseResponseMapper):
         results: list[ExerciseResponse] = []
         for exercise in exercises:
             result = ExerciseResponse.model_validate(exercise)
-            if exercise.max_weight:
+            if exercise.personal_record:
                 result.personal_record = MaxWeightResponse.model_validate(
-                    exercise.max_weight
+                    exercise.personal_record
                 )
             results.append(result)
         return results
@@ -20,8 +20,8 @@ class ExerciseMapper(BaseResponseMapper):
     def transform_to_response(self, exercise: Exercise):
         # return as it is because there's no need for special mapping
         result: ExerciseResponse = ExerciseResponse.model_validate(exercise)
-        if exercise.max_weight:
+        if exercise.personal_record:
             result.personal_record = MaxWeightResponse.model_validate(
-                exercise.max_weight
+                exercise.personal_record
             )
         return result

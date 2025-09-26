@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="p-8">
       <p class="text-xl w-max mx-auto font-bold">Routines</p>
-  </div>
+    </div>
     <!-- content -->
     <div class="w-2/5 mx-auto flex flex-col gap-10">
       <!-- buttons -->
@@ -22,7 +22,7 @@
       <!-- quick glance -->
       <!-- TODO: do @for here  -->
       <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
-        <p-scrollpanel [style]="{ width: '100%', height: '70vh' }">
+        <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
           @for (routine of routines; track routine.id) {
             <p-card class="m-4">
               <ng-template #title>
@@ -35,7 +35,7 @@
               <p>{{ routine.description }}</p>
               <!-- <p-button label="Start routine" /> -->
               <ng-template #footer>
-                <div class="flex gap-4 mt-1">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
                   <p-button
                     (click)="startRoutine(routine)"
                     label="Start Routine"

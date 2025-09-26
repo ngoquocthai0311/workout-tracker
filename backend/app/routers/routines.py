@@ -32,7 +32,7 @@ def read_routines(
                 joinedload(Routine.exercise_links).options(
                     joinedload(RoutineExercise.routine_exercise_sets),
                     joinedload(RoutineExercise.exercise).joinedload(
-                        Exercise.max_weight
+                        Exercise.personal_record
                     ),
                 )
             )
@@ -60,7 +60,9 @@ def get_routine(
         .options(
             joinedload(Routine.exercise_links).options(
                 joinedload(RoutineExercise.routine_exercise_sets),
-                joinedload(RoutineExercise.exercise).joinedload(Exercise.max_weight),
+                joinedload(RoutineExercise.exercise).joinedload(
+                    Exercise.personal_record
+                ),
             )
         )
     ).first()
@@ -91,6 +93,7 @@ def create_routine(
             RoutineExercise(
                 exercise_id=exercise.exercise_id,
                 order=exercise_index + 1,
+                notes=exercise.notes,
                 created_at=timestamp,
                 updated_at=timestamp,
                 routine_exercise_sets=[
@@ -196,6 +199,7 @@ def update_routine(
             if input_exercise.id in routine_exercises.keys():
                 routine_exercise: RoutineExercise = routine_exercises[input_exercise.id]
 
+                routine_exercise.notes = input_exercise.notes
                 routine_exercise.order = exercise_order + 1
                 routine_exercise.updated_at = timestamp
                 routine_exercise.exercise_id = input_exercise.exercise_id
@@ -242,6 +246,7 @@ def update_routine(
                 routine_exercise: RoutineExercise = RoutineExercise(
                     routine=routine,
                     exercise_id=input_exercise.exercise_id,
+                    notes=input_exercise.notes,
                     order=exercise_order + 1,
                     created_at=timestamp,
                     updated_at=timestamp,

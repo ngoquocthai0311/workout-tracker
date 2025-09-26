@@ -27,7 +27,7 @@ def read_exercises(
     session: Session = Depends(get_db),
 ):
     exercises = session.exec(
-        select(Exercise).options(joinedload(Exercise.max_weight))
+        select(Exercise).options(joinedload(Exercise.personal_record))
     ).all()
 
     return mapper.map_list_to_response(exercises)
@@ -46,7 +46,7 @@ def get_exercise(
     exercise = session.exec(
         select(Exercise)
         .where(Exercise.id == exercise_id)
-        .options(joinedload(Exercise.max_weight))
+        .options(joinedload(Exercise.personal_record))
     ).one()
     if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
@@ -115,7 +115,7 @@ def update_exercise(
         session.commit()
         session.refresh(exercise)
 
-        return mapper.transform_to_response(exercise, max_weight=True)
+        return mapper.transform_to_response(exercise, personal_record=True)
 
     return Response(status_code=204)
 

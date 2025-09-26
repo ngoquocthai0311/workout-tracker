@@ -15,23 +15,29 @@
         />
       </div>
       <!-- quick glance -->
-      <div class="grid grid-cols-2 gap-8">
+      <div class="grid gap-4 lg:gap-8 grid-cols-1 lg:grid-cols-2">
         <p-card header="Total workouts">
           <p>{{ glance.total_workouts }}</p>
         </p-card>
         <p-card header="Total volume">
-          <p>{{ glance.total_volumes }}</p>
+          <p>{{ glance.total_volumes }} kg</p>
         </p-card>
-        <p-card header="Total Frequent">
+        <p-card header="Streaks">
           <p>{{ glance.streaks }}</p>
         </p-card>
         <p-card header="Last Workout">
-          <p>{{ glance.last_workout | date }}</p>
+          <p>
+            @if (glance.last_workout) {
+              {{ glance.last_workout | date }}
+            } @else {
+              Start a new one!
+            }
+          </p>
         </p-card>
       </div>
 
       <!-- recent activity -->
-      <div>
+      <div class="collapse lg:visible">
         <p class="w-max mx-auto font-bold mb-5">Recent activity</p>
         <p-table
           [value]="recentSessions || []"
@@ -50,7 +56,7 @@
               <td>{{ session.name }}</td>
               <td>{{ session.description }}</td>
               <td>{{ session.exercises | exerciseSummary: "sets" }}</td>
-              <td>{{ session.total_weight }}</td>
+              <td>{{ session.total_weights }} kg</td>
             </tr>
           </ng-template>
         </p-table>

@@ -25,10 +25,10 @@ export interface RoutineExercise {
   id?: number;
   exercise_id?: number;
   name: string;
-  description?: string;
+  notes?: string;
   created_at: Date;
   updated_at: Date;
-  max_weight?: number;
+  personal_record?: number;
   sets?: ExerciseSet[];
 }
 
@@ -51,6 +51,8 @@ export interface Session {
   updated_at?: Date | null;
   notes?: string | null;
   exercises?: SessionExercise[];
+  routine_id?: number;
+  total_weights?: number;
 }
 
 export interface SessionExercise {

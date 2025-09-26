@@ -56,9 +56,9 @@
           </div>
         </div>
 
-        <!-- list of exercises -->
-        @if (session.exercises) {
-          <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
+        <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
+          <!-- list of exercises -->
+          @if (session.exercises) {
             <div
               class="draggable-exercise-list"
               cdkDropList
@@ -72,6 +72,7 @@
                 <div class="draggable-exercise" cdkDrag>
                   <p-card class="m-4">
                     <ng-template #title>
+                      <!-- TODO: investigate why we have separate exercise name like this -->
                       {{ exercise.name }}
                     </ng-template>
                     <ng-template #footer>
@@ -96,13 +97,24 @@
                       <label for="username" class="font-semibold w-24"
                         >Note</label
                       >
-                      <input
-                        [(ngModel)]="exercise.description"
-                        pInputText
-                        id="username"
-                        class="flex-auto"
-                        autocomplete="off"
-                      />
+                      @if (exercise.id) {
+                        <input
+                          [(ngModel)]="exercise.description"
+                          pInputText
+                          id="username"
+                          class="flex-auto"
+                          autocomplete="off"
+                        />
+                      } @else {
+                        <input
+                          pInputText
+                          id="username"
+                          class="flex-auto"
+                          autocomplete="off"
+                          placeholder="This exercise is removed"
+                          disabled
+                        />
+                      }
                     </div>
                     <!-- list of sets -->
                     <div
@@ -164,52 +176,33 @@
               }
               <p-scrollpanel></p-scrollpanel>
             </div>
+          }
+          <div class="visible lg:collapse">
+            <p-button
+              label="Add exercise"
+              (click)="exercisesVisible = true"
+              severity="secondary"
+              class="w-full"
+              [outlined]="true"
+              styleClass="w-full"
+            />
+            <p-drawer
+              header="Exercises"
+              [(visible)]="exercisesVisible"
+              position="right"
+            >
+              <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
+            </p-drawer>
           </div>
-        }
+        </div>
       </div>
     </div>
   </div>
 
   <!-- add exercise -->
-  <div class="h-screen exercisebar flex flex-col gap-4">
-    <div>
-      <p class="w-max font-bold">Library</p>
-    </div>
-    <p-iconfield>
-      <p-inputicon styleClass="pi pi-search" />
-      <input
-        (input)="searchExercise($event)"
-        type="text"
-        pInputText
-        placeholder="Search"
-      />
-    </p-iconfield>
-    <p-button (click)="createExercise()" label="Create new exercise" rounded />
-    <!-- list all exercises -->
-    <div>
-      <p-divider />
-      <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
-        <div>
-          <p-table
-            [value]="filteredExercises"
-            [tableStyle]="{ 'min-width': '40vh' }"
-          >
-            <ng-template #body let-exercise>
-              <tr>
-                <td>
-                  <p-button
-                    (click)="addExercise(exercise.id)"
-                    icon="pi pi-plus"
-                    severity="secondary"
-                    rounded
-                  />
-                </td>
-                <td>{{ exercise.name }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </div>
-      </p-scrollpanel>
+  <div class="collapse lg:visible">
+    <div class="h-screen exercisebar flex flex-col gap-4">
+      <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
     </div>
   </div>
 </div>
@@ -218,7 +211,7 @@
 <p-dialog
   header="Create exercise"
   [modal]="true"
-  [(visible)]="visible"
+  [(visible)]="exerciseDialogVisible"
   [style]="{ width: '25rem' }"
 >
   <form [formGroup]="createExerciseFormGroup" (ngSubmit)="onCreateExercise()">
@@ -252,3 +245,45 @@
     </div>
   </form>
 </p-dialog>
+
+<ng-template #exerciseTemplate>
+  <div>
+    <p class="w-max font-bold">Library</p>
+  </div>
+  <p-iconfield>
+    <p-inputicon styleClass="pi pi-search" />
+    <input
+      (input)="searchExercise($event)"
+      type="text"
+      pInputText
+      placeholder="Search"
+    />
+  </p-iconfield>
+  <p-button (click)="createExercise()" label="Create new exercise" rounded />
+  <!-- list all exercises -->
+  <div>
+    <p-divider />
+    <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
+      <div>
+        <p-table
+          [value]="filteredExercises"
+          [tableStyle]="{ 'min-width': '40vh' }"
+        >
+          <ng-template #body let-exercise>
+            <tr>
+              <td>
+                <p-button
+                  (click)="addExercise(exercise.id)"
+                  icon="pi pi-plus"
+                  severity="secondary"
+                  rounded
+                />
+              </td>
+              <td>{{ exercise.name }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-scrollpanel>
+  </div>
+</ng-template>

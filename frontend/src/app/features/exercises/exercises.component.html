@@ -30,7 +30,7 @@
         </div>
         <div class="outline-2 outline-offset-2 outline-dashed rounded-lg">
           <!-- TODO: do virtual scorlling here for performance -->
-          <p-scrollpanel [style]="{ width: '100%', height: '70vh' }">
+          <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
             @for (exercise of filteredExercises; track exercise.id) {
               <p-card header="Back day exercise">
                 <ng-template #title>
@@ -50,7 +50,8 @@
                   </p>
                 }
                 <ng-template #footer>
-                  <div class="flex gap-4 mt-1">
+                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
+                    <!-- TODO: a page for detail graph -->
                     <p-button
                       label="Detail"
                       class="w-full"

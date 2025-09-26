@@ -28,13 +28,14 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ToastService } from '../../../core/services/toast.service';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import {
   CdkDrag,
   CdkDragDrop,
   CdkDropList,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
+import { DrawerModule } from 'primeng/drawer';
 
 @Component({
   selector: 'app-session-form',
@@ -54,6 +55,8 @@ import {
     DatePipe,
     CdkDrag,
     CdkDropList,
+    DrawerModule,
+    NgTemplateOutlet,
   ],
   templateUrl: './session-form.component.html',
   styleUrl: './session-form.component.scss',
@@ -72,7 +75,8 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   public exercises: Exercise[] = [];
   public filteredExercises: Exercise[] = [];
   public session: Session = {} as Session;
-  public visible: boolean = false;
+  public exerciseDialogVisible: boolean = false;
+  public exercisesVisible: boolean = false;
   public createExerciseFormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
@@ -105,7 +109,8 @@ export class SessionFormComponent implements OnInit, OnDestroy {
           this.session.exercises?.push({
             id: routineExercise.exercise_id,
             name: routineExercise.name,
-            description: routineExercise.description,
+            // TODO: Investigate why I put it
+            // description: routineExercise.notes,
             sets: routineExercise.sets as unknown as SessionExerciseSet[],
           } as SessionExercise);
         });
@@ -184,6 +189,10 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     // pause timer
     this.timer?.unsubscribe();
 
+    if (this.routineId) {
+      this.session.routine_id = this.routineId;
+    }
+
     this.apiService
       .createSession(this.session)
       .pipe(takeUntil(this.destroy$))
@@ -203,6 +212,7 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.session = data as Session;
+        console.log(this.session);
       });
   }
 
@@ -274,11 +284,12 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   }
 
   createExercise() {
-    this.visible = true;
+    this.exerciseDialogVisible = true;
+    this.exercisesVisible = false;
   }
 
   closeDialog() {
-    this.visible = false;
+    this.exerciseDialogVisible = false;
     this.createExerciseFormGroup.reset();
   }
 
@@ -292,10 +303,20 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     this.apiService
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.visible = false;
+      .subscribe((data: Exercise) => {
+        this.exerciseDialogVisible = false;
         this.createExerciseFormGroup.reset();
         this.fetchExercises();
+
+        if (data) {
+          if (!this.session.exercises) {
+            this.session.exercises = [] as SessionExercise[];
+          }
+          this.session.exercises?.push({
+            ...data,
+            id: data.id,
+          } as SessionExercise);
+        }
       });
   }
 

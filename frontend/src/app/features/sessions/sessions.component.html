@@ -27,7 +27,7 @@
               </ng-template>
               <p>{{ session.description }}</p>
               <ng-template #footer>
-                <div class="flex gap-4 mt-1">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
                   <p-button
                     (click)="getSessionDetail(session.id)"
                     label="Detail"

@@ -44,6 +44,7 @@ class CreateRoutineRequest(SQLModel):
             targeted_reps: Optional[int] = 0
 
         exercise_id: Optional[int] = None
+        notes: Optional[str] = None
         sets: list[ExerciseSet] = None
 
     name: str
@@ -61,6 +62,7 @@ class UpdateRoutineRequest(SQLModel):
             targeted_reps: Optional[int] = 0
 
         id: Optional[int] = None
+        notes: Optional[str] = None
         exercise_id: int
         sets: list[ExerciseSet] = None
 
@@ -82,6 +84,7 @@ class CreateWorkoutSessionRequest(SQLModel):
             reps_completed: Optional[int] = 0
 
         id: int
+        name: str
         sets: list[ExerciseSet] = None
 
         # TODO: Notes field can be add for each workout session exercise link
@@ -104,7 +107,10 @@ class UpdateWorkoutSessionRequest(SQLModel):
             weight_lifted: Optional[int] = 0
             reps_completed: Optional[int] = 0
 
-        id: int
+        # NOTE: Optional id to make respect the history of session exercise when
+        # an exercise is deleted from the system
+        id: Optional[int] = None
+        name: str
         sets: list[ExerciseSet] = None
 
         # TODO: Notes field can be add for each workout session exercise link

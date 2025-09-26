@@ -27,7 +27,10 @@ function transformDate(item: any): void {
   ) {
     item.created_at = new Date(item.created_at * 1000);
     item.updated_at = new Date(item.updated_at * 1000);
-  } else if (Object.prototype.hasOwnProperty.call(item, 'last_workout')) {
+  } else if (
+    Object.prototype.hasOwnProperty.call(item, 'last_workout') &&
+    item.last_workout
+  ) {
     item.last_workout = new Date(item.last_workout * 1000);
   }
 

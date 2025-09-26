@@ -31,6 +31,8 @@ import {
   CdkDropList,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
+import { DrawerModule } from 'primeng/drawer';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'app-routine-form',
@@ -49,6 +51,8 @@ import {
     ScrollPanelModule,
     CdkDrag,
     CdkDropList,
+    DrawerModule,
+    NgTemplateOutlet,
   ],
   templateUrl: './routine-form.component.html',
   styleUrl: './routine-form.component.scss',
@@ -62,7 +66,8 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
   public exercises: Exercise[] = [];
   public filteredExercises: Exercise[] = [];
   public routine: Routine = {} as Routine;
-  public visible: boolean = false;
+  public exerciseDialogVisible: boolean = false;
+  public exercisesVisible: boolean = false;
 
   public createExerciseFormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -132,11 +137,12 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
   }
 
   createExercise() {
-    this.visible = true;
+    this.exerciseDialogVisible = true;
+    this.exercisesVisible = false;
   }
 
   closeDialog() {
-    this.visible = false;
+    this.exerciseDialogVisible = false;
     this.createExerciseFormGroup.reset();
   }
 
@@ -150,10 +156,21 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     this.apiService
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.visible = false;
+      .subscribe((data: Exercise) => {
+        this.exerciseDialogVisible = false;
         this.createExerciseFormGroup.reset();
         this.fetchExercises();
+
+        if (data) {
+          if (!this.routine.exercises) {
+            this.routine.exercises = [] as RoutineExercise[];
+          }
+          this.routine.exercises?.push({
+            ...data,
+            exercise_id: data.id,
+            id: null as unknown,
+          } as RoutineExercise);
+        }
       });
   }
 
@@ -179,6 +196,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.routine = data as Routine;
+        console.log(this.routine);
       });
   }
 

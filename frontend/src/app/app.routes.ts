@@ -60,12 +60,13 @@ export const routes: Routes = [
       ),
     title: 'sessions',
   },
-  {
-    path: 'reports',
-    loadComponent: () =>
-      import('./features/reports/reports.component').then(
-        (m) => m.ReportsComponent,
-      ),
-    title: 'reports',
-  },
+  // TODO: Add report component
+  // {
+  //   path: 'reports',
+  //   loadComponent: () =>
+  //     import('./features/reports/reports.component').then(
+  //       (m) => m.ReportsComponent,
+  //     ),
+  //   title: 'reports',
+  // },
 ];

@@ -25,14 +25,13 @@ class RoutineMapper(BaseResponseMapper):
             # map for each exercise and its set
             for exercise_link in routine.exercise_links:
                 exercise: RoutineExerciseResponse = (
-                    RoutineExerciseResponse.model_validate(exercise_link.exercise)
+                    RoutineExerciseResponse.model_validate(exercise_link)
                 )
-                exercise.exercise_id = exercise.id
-                exercise.id = exercise_link.id
-                exercise.sets = exercise_link.routine_exercise_sets
+                exercise.exercise_id = exercise_link.exercise.id
+                exercise.name = exercise_link.exercise.name
                 exercise.personal_best = (
-                    exercise_link.exercise.max_weight.weight
-                    if exercise_link.exercise.max_weight
+                    exercise_link.exercise.personal_record.weight
+                    if exercise_link.exercise.personal_record
                     else None
                 )
                 exercises.append(exercise)
@@ -59,11 +58,15 @@ class RoutineMapper(BaseResponseMapper):
         # map for each set
         for exercise_link in routine.exercise_links:
             exercise: RoutineExerciseResponse = RoutineExerciseResponse.model_validate(
-                exercise_link.exercise
+                exercise_link
             )
-            exercise.exercise_id = exercise.id
-            exercise.id = exercise_link.id
-            exercise.sets = exercise_link.routine_exercise_sets
+            exercise.exercise_id = exercise_link.exercise.id
+            exercise.name = exercise_link.exercise.name
+            exercise.personal_best = (
+                exercise_link.exercise.personal_record.weight
+                if exercise_link.exercise.personal_record
+                else None
+            )
             exercises.append(exercise)
 
         results.exercises = exercises

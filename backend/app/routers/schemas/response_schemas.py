@@ -35,8 +35,8 @@ class ExerciseSetResponse(SQLModel):
 class RoutineExerciseResponse(SQLModel):
     id: Optional[int] = None
     exercise_id: Optional[int] = None
-    name: str
-    description: Optional[str] = None
+    name: Optional[str] = None
+    notes: Optional[str] = None
     created_at: float
     updated_at: float
     personal_best: Optional[Decimal] = None
@@ -62,6 +62,7 @@ class SessionResponse(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
     duration: Optional[int] = None
+    total_weights: Optional[int] = None
     created_at: float
     updated_at: Optional[float] = None
     notes: Optional[str] = None
@@ -78,7 +79,7 @@ class SessionExerciseResponse(SQLModel):
         weight_lifted: Optional[Decimal] = 0
         reps_completed: Optional[int] = 0
 
-    id: int
+    id: Optional[int] = None
     name: Optional[str] = None
     description: Optional[str] = None
     sets: Optional[list[SessionExerciseSetResponse]] = None

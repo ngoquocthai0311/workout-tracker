@@ -61,9 +61,20 @@ class WorkoutSessionMapper(BaseResponseMapper):
         for session_exercise in workout_session.exercise_links:
             if session_exercise.order not in dictionary.keys():
                 # add new order to dict
-                dictionary[session_exercise.order] = (
-                    SessionExerciseResponse.model_validate(session_exercise.exercise)
-                )
+                if session_exercise.exercise:
+                    dictionary[session_exercise.order] = (
+                        SessionExerciseResponse.model_validate(
+                            session_exercise.exercise
+                        )
+                    )
+                else:
+                    dictionary[session_exercise.order] = SessionExerciseResponse(
+                        id=None,
+                        name=session_exercise.exercise_name,
+                        # TODO: investigate why empty description here
+                        # Mostly the
+                        description=None,
+                    )
                 dictionary[session_exercise.order].sets = []
 
             session_exercise_response_model = (

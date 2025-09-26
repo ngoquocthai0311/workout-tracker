@@ -221,10 +221,10 @@ def get_a_glance(
         .order_by(WorkoutSession.created_at.desc())
         .limit(1)
     )
-    last_workout = session.exec(last_workout_statement).one()
+    last_workout = session.exec(last_workout_statement).one_or_none()
     return {
-        "total_workouts": recent_workouts,
-        "total_volumes": total_volumes,
-        "streaks": streaks,
-        "last_workout": last_workout,
+        "total_workouts": recent_workouts or 0,
+        "total_volumes": total_volumes or 0,
+        "streaks": streaks or 0,
+        "last_workout": last_workout or None,
     }
