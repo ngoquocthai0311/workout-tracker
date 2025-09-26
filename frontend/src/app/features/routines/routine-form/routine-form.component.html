@@ -1,0 +1,271 @@
+<!-- TODO: using router outlet here with specific name to navigate to correct component -->
+<ng-template #testing>
+  <p>testing</p>
+</ng-template>
+<!-- Focus on creating routine / edit routine first -->
+<div class="w-full relative">
+  <!-- edit/ create routine -->
+  <div class="mx-auto">
+    <!-- header -->
+    <div class="p-8">
+      @if (routine.id) {
+        <p class="text-xl w-max mx-auto font-bold">Edit routine</p>
+      } @else {
+        <p class="text-xl w-max mx-auto font-bold">Create routine</p>
+      }
+    </div>
+
+    <!--content  -->
+    <div class="w-2/5 mx-auto flex flex-col gap-10">
+      <!-- button -->
+      <div>
+        @if (routine.id) {
+          <p-button [rounded]="true" label="Update" (click)="updateRoutine()" />
+        } @else {
+          <p-button [rounded]="true" label="Create" (click)="createRoutine()" />
+        }
+      </div>
+      <!-- form for name and description of session form -->
+      <div>
+        <div class="flex items-center gap-4 mb-4">
+          <label for="username" class="font-semibold w-24">Name</label>
+          <input
+            [(ngModel)]="routine.name"
+            pInputText
+            id="username"
+            class="flex-auto"
+            autocomplete="off"
+          />
+        </div>
+        <div class="flex items-center gap-4 mb-8">
+          <label for="email" class="font-semibold w-24">Description</label>
+          <input
+            [(ngModel)]="routine.description"
+            pInputText
+            id="email"
+            class="flex-auto"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <!-- list of routine exercises -->
+
+      <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
+        @if (routine.exercises) {
+          <div
+            class="draggable-exercise-list"
+            cdkDropList
+            (cdkDropListDropped)="dropExercise($event)"
+          >
+            @for (
+              exercise of routine.exercises;
+              track $index;
+              let exerciseNumber = $index
+            ) {
+              <div class="draggable-exercise" cdkDrag>
+                <p-card>
+                  <ng-template #title>
+                    {{ exercise.name }}
+                  </ng-template>
+                  <ng-template #footer>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-1">
+                      <p-button
+                        label="Add set"
+                        (click)="addSet(exerciseNumber)"
+                        class="w-full"
+                        styleClass="w-full"
+                      />
+                      <p-button
+                        (click)="removeExercise(exerciseNumber)"
+                        label="Remove"
+                        severity="secondary"
+                        class="w-full"
+                        [outlined]="true"
+                        styleClass="w-full"
+                      />
+                    </div>
+                  </ng-template>
+                  <div
+                    class="grid grid-cols-1 lg:grid-cols-2 items-center gap-4 mb-4"
+                  >
+                    <label for="username" class="font-semibold w-24"
+                      >Note</label
+                    >
+                    <input
+                      [(ngModel)]="exercise.notes"
+                      pInputText
+                      id="username"
+                      class="flex-auto"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <!-- list of routine exercise sets -->
+                  <div
+                    class="draggable-set-list"
+                    cdkDropList
+                    (cdkDropListDropped)="dropSet($event, exercise.sets)"
+                  >
+                    <p-table
+                      [value]="exercise.sets || []"
+                      [tableStyle]="{ 'min-width': '50rem' }"
+                    >
+                      <ng-template #header>
+                        <tr>
+                          <th>Set type</th>
+                          <th>Target Weight</th>
+                          <th>Target Reps</th>
+                          <th></th>
+                          <th style="width: 5rem"></th>
+                        </tr>
+                      </ng-template>
+                      <ng-template #body let-set let-setIndex="rowIndex">
+                        <tr class="draggable-set" cdkDrag>
+                          <td>
+                            <input
+                              type="text"
+                              [(ngModel)]="set.set_type"
+                              pInputText
+                              placeholder="Search"
+                            />
+                          </td>
+                          <td>
+                            <p-inputnumber
+                              inputId="integeronly"
+                              [(ngModel)]="set.targeted_weight"
+                            />
+                          </td>
+                          <td>
+                            <p-inputnumber
+                              inputId="integeronly"
+                              [(ngModel)]="set.targeted_reps"
+                            />
+                          </td>
+                          <td>
+                            <p-button
+                              (click)="removeSet(setIndex, exercise.id)"
+                              icon="pi pi-trash"
+                              severity="secondary"
+                              rounded
+                            />
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  </div>
+                </p-card>
+              </div>
+            }
+          </div>
+        }
+        <!-- Div to show when in mobile view that trigger exercise dialog -->
+        <div class="visible lg:collapse">
+          <p-button
+            label="Add exercise"
+            (click)="exercisesVisible = true"
+            severity="secondary"
+            class="w-full"
+            [outlined]="true"
+            styleClass="w-full"
+          />
+          <p-drawer
+            header="Exercises"
+            [(visible)]="exercisesVisible"
+            position="right"
+          >
+            <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
+          </p-drawer>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- add exercise -->
+  <div class="collapse lg:visible">
+    <div class="exercisebar flex flex-col gap-4">
+      <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog for creating exercise -->
+<p-dialog
+  header="Create exercise"
+  [modal]="true"
+  [(visible)]="exerciseDialogVisible"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="createExerciseFormGroup" (ngSubmit)="onCreateExercise()">
+    <div class="flex items-center gap-4 mb-4">
+      <label for="name" class="font-semibold w-24">Name</label>
+      <input
+        pInputText
+        id="name"
+        class="flex-auto"
+        formControlName="name"
+        autocomplete="off"
+      />
+    </div>
+    <div class="flex items-center gap-4 mb-8">
+      <label for="description" class="font-semibold w-24">Description</label>
+      <input
+        pInputText
+        id="description"
+        formControlName="description"
+        class="flex-auto"
+        autocomplete="off"
+      />
+    </div>
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" severity="secondary" (click)="closeDialog()" />
+      <p-button
+        type="submit"
+        [disabled]="!createExerciseFormGroup.valid"
+        label="Save"
+      />
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Template of all exercises  -->
+<ng-template #exerciseTemplate>
+  <div>
+    <p class="w-max font-bold">Library</p>
+  </div>
+  <p-iconfield>
+    <p-inputicon styleClass="pi pi-search" />
+    <input
+      (input)="searchExercise($event)"
+      type="text"
+      pInputText
+      placeholder="Search"
+    />
+  </p-iconfield>
+  <p-button (click)="createExercise()" label="Create new exercise" rounded />
+  <!-- list all exercises -->
+  <div>
+    <p-divider />
+    <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
+      <div>
+        <p-table
+          [value]="filteredExercises"
+          [tableStyle]="{ 'min-width': '40vh' }"
+        >
+          <ng-template #body let-exercise>
+            <tr>
+              <td>
+                <p-button
+                  (click)="addExercise(exercise.id)"
+                  icon="pi pi-plus"
+                  severity="secondary"
+                  rounded
+                />
+              </td>
+              <td>{{ exercise.name }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-scrollpanel>
+  </div>
+</ng-template>

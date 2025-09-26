@@ -1,0 +1,78 @@
+<div class="desktop-screen relative h-screen w-screen">
+  <!-- side bar -->
+  <div class="sidebar">
+    <div class="w-48 h-full">
+      <div class="h-24 flex justify-center">
+        <div>
+          <b>Workout Tracker</b>
+        </div>
+      </div>
+      <!-- items -->
+      <div class="flex flex-col justify-center gap-6">
+        <a [routerLink]="['']">Home</a>
+        <a [routerLink]="['routines']">Routines</a>
+        <a [routerLink]="['sessions']">Sessions</a>
+        <a [routerLink]="['exercises']">Exercises</a>
+        <!-- <a [routerLink]="['reports']">Reports</a> -->
+      </div>
+    </div>
+  </div>
+  <div class="headbar">
+    <div class="w-full h-full flex items-center justify-between">
+      <p-button
+        (click)="visibleSideBar = true"
+        class="p-3"
+        icon="pi pi-align-justify"
+        variant="text"
+        rounded
+      />
+      <p-button
+        (click)="visibleSideBar = false"
+        class="p-3"
+        icon="pi pi-home"
+        variant="text"
+        rounded
+        [routerLink]="['']"
+      />
+    </div>
+
+    <!-- side bar drawer for mobile -->
+    <div class="card flex justify-center">
+      <p-drawer [(visible)]="visibleSideBar" header="workout tracker">
+        <div class="w-48 h-full">
+          <!-- items -->
+          <div class="flex flex-col justify-center gap-6">
+            <a (click)="visibleSideBar = false" [routerLink]="['']">Home</a>
+            <a (click)="visibleSideBar = false" [routerLink]="['routines']"
+              >Routines</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['sessions']"
+              >Sessions</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['exercises']"
+              >Exercises</a
+            >
+            <a (click)="visibleSideBar = false" [routerLink]="['reports']"
+              >Reports</a
+            >
+          </div>
+        </div>
+      </p-drawer>
+    </div>
+  </div>
+  <!-- content -->
+  <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
+    <div class="content lg:h-screen">
+      <router-outlet />
+    </div>
+  </p-scrollpanel>
+
+  <!-- TODO: create child component and using routing child for better rendering state -->
+  <!-- exercise bar -->
+  <!-- <div class="w-48 h-full exercisebar">
+    <p>testing</p>
+  </div> -->
+</div>
+
+<!-- toast -->
+<p-toast />

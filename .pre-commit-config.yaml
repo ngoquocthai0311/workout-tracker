@@ -1,0 +1,10 @@
+# set up precommit for ruff: https://docs.astral.sh/ruff/integrations/#pre-commit
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.9
+    hooks:
+      - id: ruff-check
+        files: ^backend/app/
+        args: [--fix]
+      - id: ruff-format
+        files: ^backend/app/
