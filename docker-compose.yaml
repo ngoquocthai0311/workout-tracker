@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16.9-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - ${DATABASE_PORT:-5432}:5432
+    environment:
+      - POSTGRES_USER=${DATABASE_USER:-user}
+      - POSTGRES_PASSWORD=${DATABASE_PASS:-password}
+      - POSTGRES_DB=${DATABASE_PASS:-workouttrackerdb}
+    networks:
+      - backend-network
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+    environment:
+      - DATABASE_USER=${DATABASE_USER:-user}
+      - DATABASE_PASS=${DATABASE_PASS:-password}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_NAME=${DATABASE_PASS:-workouttrackerdb}
+      - DATABASE_ECHO=${DATABASE_ECHO:-0}
+      # NOTE: database host is the name of the "db" image
+      - DATABASE_HOST=db
+    ports:
+      - "8000:8000"
+    networks:
+      - backend-network
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "4200:80"
+    networks:
+      - backend-network
+
+volumes:
+  postgres_data:
+
+networks:
+  backend-network:
+    driver: bridge # Defines the specific network
