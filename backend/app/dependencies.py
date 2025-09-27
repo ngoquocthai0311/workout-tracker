@@ -18,12 +18,13 @@ class Settings:
         self.DATABASE_PASS: str = os.environ["DATABASE_PASS"]
         self.DATABASE_PORT: str = os.environ["DATABASE_PORT"]
         self.DATABASE_NAME: str = os.environ["DATABASE_NAME"]
+        self.DATABASE_HOST: str = os.environ["DATABASE_HOST"]
 
         # getenv for unnecessary env vars
         self.DATABASE_ECHO: bool = bool(os.getenv("DATABASE_ECHO", 0))
 
-        self.DATABASE_URL: str = f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASS}@localhost:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
-        self.SQLALCHEMY_URL: str = f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASS}@localhost/{self.DATABASE_NAME}"
+        self.DATABASE_URL: str = f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASS}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+        self.SQLALCHEMY_URL: str = f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASS}@{self.DATABASE_HOST}/{self.DATABASE_NAME}"
 
 
 # use this to init database
