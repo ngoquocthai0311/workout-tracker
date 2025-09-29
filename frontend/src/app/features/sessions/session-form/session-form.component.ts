@@ -27,7 +27,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { Dialog } from 'primeng/dialog';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
-import { ToastService } from '../../../core/services/toast.service';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import {
   CdkDrag,
@@ -63,7 +62,6 @@ import { DrawerModule } from 'primeng/drawer';
 })
 export class SessionFormComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
-  private toastService = inject(ToastService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
@@ -277,7 +275,6 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .getExercises()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        this.toastService.showSuccess('fetch successfully');
         this.exercises = data as Exercise[];
         this.filteredExercises = this.exercises;
       });
