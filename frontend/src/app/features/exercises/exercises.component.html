@@ -28,49 +28,55 @@
             />
           </p-iconfield>
         </div>
-        <div class="outline-2 outline-offset-2 outline-dashed rounded-lg">
-          <!-- TODO: do virtual scorlling here for performance -->
-          <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
-            @for (exercise of filteredExercises; track exercise.id) {
-              <p-card header="Back day exercise">
-                <ng-template #title>
-                  {{ exercise.name }}
-                </ng-template>
-                <ng-template #subtitle>
-                  {{ exercise.description }}
-                </ng-template>
-                @if (exercise.personal_record) {
-                  <p>
-                    Personal Best:
-                    {{ exercise.personal_record.weight || 0 }} kg
-                  </p>
-                  <p>
-                    Achieved on:
-                    {{ exercise.personal_record.updated_at | date }}
-                  </p>
-                }
-                <ng-template #footer>
-                  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
-                    <!-- TODO: a page for detail graph -->
-                    <p-button
-                      label="Detail"
-                      class="w-full"
-                      styleClass="w-full"
-                    />
-                    <p-button
-                      (click)="removeExercise(exercise.id)"
-                      label="Remove"
-                      severity="secondary"
-                      class="w-full"
-                      [outlined]="true"
-                      styleClass="w-full"
-                    />
-                  </div>
-                </ng-template>
-              </p-card>
-            }
-          </p-scrollpanel>
-        </div>
+        @if (filteredExercises.length == 0) {
+          <p-card header="Add a new exercise!">
+            To start a great journey!
+          </p-card>
+        } @else {
+          <div class="outline-2 outline-offset-2 outline-dashed rounded-lg">
+            <!-- TODO: do virtual scorlling here for performance -->
+            <p-scrollpanel [style]="{ width: '100%', height: '50vh' }">
+              @for (exercise of filteredExercises; track exercise.id) {
+                <p-card header="Back day exercise">
+                  <ng-template #title>
+                    {{ exercise.name }}
+                  </ng-template>
+                  <ng-template #subtitle>
+                    {{ exercise.description }}
+                  </ng-template>
+                  @if (exercise.personal_record) {
+                    <p>
+                      Personal Best:
+                      {{ exercise.personal_record.weight || 0 }} kg
+                    </p>
+                    <p>
+                      Achieved on:
+                      {{ exercise.personal_record.updated_at | date }}
+                    </p>
+                  }
+                  <ng-template #footer>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-1">
+                      <!-- TODO: a page for detail graph -->
+                      <p-button
+                        label="Detail"
+                        class="w-full"
+                        styleClass="w-full"
+                      />
+                      <p-button
+                        (click)="removeExercise(exercise.id)"
+                        label="Remove"
+                        severity="secondary"
+                        class="w-full"
+                        [outlined]="true"
+                        styleClass="w-full"
+                      />
+                    </div>
+                  </ng-template>
+                </p-card>
+              }
+            </p-scrollpanel>
+          </div>
+        }
       </div>
     </div>
   </div>

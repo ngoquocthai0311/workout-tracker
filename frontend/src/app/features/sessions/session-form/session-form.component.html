@@ -57,8 +57,8 @@
         </div>
 
         <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
-          <!-- list of exercises -->
           @if (session.exercises) {
+            <!-- list of exercises -->
             <div
               class="draggable-exercise-list"
               cdkDropList
@@ -176,24 +176,47 @@
               }
               <p-scrollpanel></p-scrollpanel>
             </div>
+            <div class="visible lg:invisible">
+              <p-button
+                label="Add exercise"
+                (click)="exercisesVisible = true"
+                severity="secondary"
+                class="w-full"
+                [outlined]="true"
+                styleClass="w-full"
+              />
+              <p-drawer
+                header="Exercises"
+                [(visible)]="exercisesVisible"
+                position="right"
+              >
+                <ng-container
+                  *ngTemplateOutlet="exerciseTemplate"
+                ></ng-container>
+              </p-drawer>
+            </div>
+          } @else {
+            <p-card header="A bit empty"></p-card>
+            <div>
+              <p-button
+                label="Add exercise"
+                (click)="exercisesVisible = true"
+                severity="secondary"
+                class="w-full"
+                [outlined]="true"
+                styleClass="w-full"
+              />
+              <p-drawer
+                header="Exercises"
+                [(visible)]="exercisesVisible"
+                position="right"
+              >
+                <ng-container
+                  *ngTemplateOutlet="exerciseTemplate"
+                ></ng-container>
+              </p-drawer>
+            </div>
           }
-          <div class="visible lg:collapse">
-            <p-button
-              label="Add exercise"
-              (click)="exercisesVisible = true"
-              severity="secondary"
-              class="w-full"
-              [outlined]="true"
-              styleClass="w-full"
-            />
-            <p-drawer
-              header="Exercises"
-              [(visible)]="exercisesVisible"
-              position="right"
-            >
-              <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
-            </p-drawer>
-          </div>
         </div>
       </div>
     </div>
@@ -260,30 +283,34 @@
     />
   </p-iconfield>
   <p-button (click)="createExercise()" label="Create new exercise" rounded />
+  <p-divider />
   <!-- list all exercises -->
-  <div>
-    <p-divider />
-    <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
-      <div>
-        <p-table
-          [value]="filteredExercises"
-          [tableStyle]="{ 'min-width': '40vh' }"
-        >
-          <ng-template #body let-exercise>
-            <tr>
-              <td>
-                <p-button
-                  (click)="addExercise(exercise.id)"
-                  icon="pi pi-plus"
-                  severity="secondary"
-                  rounded
-                />
-              </td>
-              <td>{{ exercise.name }}</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
-    </p-scrollpanel>
-  </div>
+  @if (filteredExercises.length == 0) {
+    <p>Add more exercise</p>
+  } @else {
+    <div>
+      <p-scrollpanel [style]="{ width: '100%', height: '100%' }">
+        <div>
+          <p-table
+            [value]="filteredExercises"
+            [tableStyle]="{ 'min-width': '40vh' }"
+          >
+            <ng-template #body let-exercise>
+              <tr>
+                <td>
+                  <p-button
+                    (click)="addExercise(exercise.id)"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    rounded
+                  />
+                </td>
+                <td>{{ exercise.name }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-scrollpanel>
+    </div>
+  }
 </ng-template>
