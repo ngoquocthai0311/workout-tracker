@@ -30,6 +30,7 @@ export class DashboardsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   public recentSessions: Session[] = [];
+  public recentSessionsLoading: boolean = true;
   public glance: DashboardGlance = {} as DashboardGlance;
   products!: any[];
 
@@ -54,12 +55,15 @@ export class DashboardsComponent implements OnInit, OnDestroy {
   }
 
   fetchRecentSessions() {
+    this.recentSessionsLoading = true;
     this.apiService
       .getSessions()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.recentSessions = data as Session[];
+        // TODO: add pagination
         this.recentSessions = this.recentSessions.slice(0, 5);
+        this.recentSessionsLoading = false;
       });
   }
 

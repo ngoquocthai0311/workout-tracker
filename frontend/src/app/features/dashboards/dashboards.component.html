@@ -17,13 +17,13 @@
       <!-- quick glance -->
       <div class="grid gap-4 lg:gap-8 grid-cols-1 lg:grid-cols-2">
         <p-card header="Total workouts">
-          <p>{{ glance.total_workouts }}</p>
+          <p>{{ glance.total_workouts || "Start one! Not gonna hurt :D" }}</p>
         </p-card>
         <p-card header="Total volume">
-          <p>{{ glance.total_volumes }} kg</p>
+          <p>{{ glance.total_volumes || "Lift only one to see a magic" }} kg</p>
         </p-card>
         <p-card header="Streaks">
-          <p>{{ glance.streaks }}</p>
+          <p>{{ glance.streaks || "Keep going ?!" }}</p>
         </p-card>
         <p-card header="Last Workout">
           <p>
@@ -40,6 +40,7 @@
       <div class="collapse lg:visible">
         <p class="w-max mx-auto font-bold mb-5">Recent activity</p>
         <p-table
+          [loading]="recentSessionsLoading"
           [value]="recentSessions || []"
           [tableStyle]="{ 'min-width': '50rem' }"
         >
@@ -57,6 +58,15 @@
               <td>{{ session.description }}</td>
               <td>{{ session.exercises | exerciseSummary: "sets" }}</td>
               <td>{{ session.total_weights }} kg</td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="4">
+                <div class="flex justify-center">
+                  <p class="inline">Have no recent workout sessions</p>
+                </div>
+              </td>
             </tr>
           </ng-template>
         </p-table>
