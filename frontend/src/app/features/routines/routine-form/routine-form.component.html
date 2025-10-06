@@ -48,7 +48,7 @@
           />
         </div>
       </div>
-      @if (routine.exercises) {
+      @if (routine.exercises && routine.exercises.length > 0) {
         <!-- list of routine exercises -->
         <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
           <div
@@ -178,13 +178,31 @@
         <p-card header="It's a bit empty">
           Add more exercise to show it here
         </p-card>
+        <!-- Div to show when in mobile view that trigger exercise dialog -->
+        <div class="visible lg:invisible">
+          <p-button
+            label="Add exercise"
+            (click)="exercisesVisible = true"
+            severity="secondary"
+            class="w-full"
+            [outlined]="true"
+            styleClass="w-full"
+          />
+          <p-drawer
+            header="Exercises"
+            [(visible)]="exercisesVisible"
+            position="right"
+          >
+            <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
+          </p-drawer>
+        </div>
       }
     </div>
   </div>
 
   <!-- add exercise -->
   <div class="collapse lg:visible">
-    <div class="exercisebar flex flex-col gap-4">
+    <div class="w-1/5 h-screen exercisebar flex flex-col gap-4">
       <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
     </div>
   </div>
@@ -254,7 +272,7 @@
         <div>
           <p-table
             [value]="filteredExercises"
-            [tableStyle]="{ 'min-width': '40vh' }"
+            [tableStyle]="{ 'min-width': '10vh' }"
           >
             <ng-template #body let-exercise>
               <tr>

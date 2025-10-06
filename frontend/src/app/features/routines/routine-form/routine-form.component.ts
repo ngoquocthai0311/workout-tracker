@@ -150,9 +150,6 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     const newExercise: Exercise = this.createExerciseFormGroup
       .value as Exercise;
 
-    // TODO: add interceptor in the future to bind user_id here if save in cookies
-    // or let the backend get it from the cookie
-    newExercise.user_id = 1;
     this.apiService
       .createExercise(newExercise)
       .pipe(takeUntil(this.destroy$))
