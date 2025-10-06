@@ -27,7 +27,7 @@ class CreateExerciseRequest(SQLModel):
 class UpdateExerciseRequest(SQLModel):
     name: str
     description: Optional[str] = None
-    user_id: Optional[int] = 1
+    user_id: int = 1
 
 
 # endregion

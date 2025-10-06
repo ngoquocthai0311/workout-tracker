@@ -28,7 +28,7 @@ class User(BaseModel, table=True):
 
     # this is the way to let database to the id increment for us not sqlmodel
     id: Optional[int] = Field(default=None, primary_key=True)
-    username: str = Field(nullable=False)
+    username: str = Field(nullable=False, unique=True)
     created_at: float = Field(nullable=False)
     updated_at: float = Field(nullable=False)
 

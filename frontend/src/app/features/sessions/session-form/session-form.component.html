@@ -57,7 +57,7 @@
         </div>
 
         <div class="rounded-lg outline-2 outline-offset-2 outline-dashed">
-          @if (session.exercises) {
+          @if (session.exercises && session.exercises.length > 0) {
             <!-- list of exercises -->
             <div
               class="draggable-exercise-list"
@@ -197,15 +197,7 @@
             </div>
           } @else {
             <p-card header="A bit empty"></p-card>
-            <div>
-              <p-button
-                label="Add exercise"
-                (click)="exercisesVisible = true"
-                severity="secondary"
-                class="w-full"
-                [outlined]="true"
-                styleClass="w-full"
-              />
+            <div class="visible lg:invisible">
               <p-drawer
                 header="Exercises"
                 [(visible)]="exercisesVisible"
@@ -215,6 +207,14 @@
                   *ngTemplateOutlet="exerciseTemplate"
                 ></ng-container>
               </p-drawer>
+              <p-button
+                label="Add exercise"
+                (click)="exercisesVisible = true"
+                severity="secondary"
+                class="w-full"
+                [outlined]="true"
+                styleClass="w-full"
+              />
             </div>
           }
         </div>
@@ -224,7 +224,7 @@
 
   <!-- add exercise -->
   <div class="collapse lg:visible">
-    <div class="h-screen exercisebar flex flex-col gap-4">
+    <div class="w-1/5 h-screen exercisebar flex flex-col gap-4">
       <ng-container *ngTemplateOutlet="exerciseTemplate"></ng-container>
     </div>
   </div>
