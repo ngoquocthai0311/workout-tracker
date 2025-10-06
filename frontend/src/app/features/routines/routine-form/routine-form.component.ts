@@ -120,12 +120,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
       .updateRoutineById(this.routineId, this.routine)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        if (Object.keys(data).length > 0) {
-          this.routine = data as Routine;
-          this.toastService.showSuccess('Update routine successfully');
-        } else {
-          this.toastService.showError('Please check your input');
-        }
+        this.routine = data as Routine;
       });
   }
 
@@ -133,14 +128,8 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     this.apiService
       .createRoutine(this.routine)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        // redirect to routines
-        if (Object.keys(data).length > 0) {
-          this.router.navigate(['/routines']);
-          this.toastService.showSuccess('Create routine successfully');
-        } else {
-          this.toastService.showError('Please check your input');
-        }
+      .subscribe(() => {
+        this.router.navigate(['/routines']);
       });
   }
 
@@ -300,14 +289,12 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     this.routineFormGroup.controls['name'].valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        console.log(value);
         this.routine.name = value || '';
       });
 
     this.routineFormGroup.controls['description'].valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((value) => {
-        console.log(value);
         this.routine.description = value || '';
       });
   }

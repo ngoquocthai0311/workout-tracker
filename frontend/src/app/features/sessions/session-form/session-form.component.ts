@@ -200,7 +200,7 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     this.apiService
       .createSession(this.session)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
+      .subscribe(() => {
         // redirect to routines
         this.router.navigate(['/sessions']);
       });
