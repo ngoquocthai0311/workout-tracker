@@ -41,7 +41,7 @@ export class SessionsComponent implements OnInit, OnDestroy {
     this.apiService
       .removeSessionById(id)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
+      .subscribe(() => {
         this.fetchSession();
       });
   }

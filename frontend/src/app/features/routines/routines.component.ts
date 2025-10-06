@@ -49,7 +49,7 @@ export class RoutinesComponent implements OnInit, OnDestroy {
     this.apiService
       .removeRoutineById(id)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((_) => {
+      .subscribe(() => {
         this.getRoutines();
       });
   }

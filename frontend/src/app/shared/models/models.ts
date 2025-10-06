@@ -75,3 +75,11 @@ export interface DashboardGlance {
   streaks: number;
   last_workout: string;
 }
+
+export interface ResponseMessage {
+  message: string;
+}
+
+export function isResponseMessage(obj: any): obj is ResponseMessage {
+  return obj && typeof obj.message === 'string';
+}

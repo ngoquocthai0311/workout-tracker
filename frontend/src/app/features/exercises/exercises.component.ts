@@ -8,10 +8,15 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormGroup, FormsModule, Validators } from '@angular/forms';
 import { Dialog } from 'primeng/dialog';
 import { ApiService } from '../../core/services/api.service';
-import { Subject, takeUntil } from 'rxjs';
-import { Exercise } from '../../shared/models/models';
+import { map, Subject, takeUntil } from 'rxjs';
+import {
+  Exercise,
+  isResponseMessage,
+  ResponseMessage,
+} from '../../shared/models/models';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-exercises',
@@ -32,6 +37,7 @@ import { DatePipe } from '@angular/common';
 })
 export class ExercisesComponent {
   private apiService = inject(ApiService);
+  private toastService = inject(ToastService);
   private destroy$ = new Subject<void>();
 
   createExerciseFormGroup = new FormGroup({
@@ -94,7 +100,7 @@ export class ExercisesComponent {
     this.apiService
       .removeExerciseById(id)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
+      .subscribe(() => {
         this.fetchExercises();
       });
   }

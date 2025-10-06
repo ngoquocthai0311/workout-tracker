@@ -33,6 +33,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { DrawerModule } from 'primeng/drawer';
 import { NgTemplateOutlet } from '@angular/common';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-routine-form',
@@ -60,6 +61,7 @@ import { NgTemplateOutlet } from '@angular/common';
 export class RoutineFormComponent implements OnInit, OnDestroy {
   private apiService = inject(ApiService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
   private destroy$ = new Subject<void>();
   private routineId: number = 0;
 
@@ -74,6 +76,11 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     description: new FormControl(''),
   });
 
+  public routineFormGroup = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+    description: new FormControl(''),
+  });
+
   products!: any[];
   selectedProduct!: any;
 
@@ -84,6 +91,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this.router.url.split('/').pop() == 'create-routine') {
       this.routine = {} as Routine;
+      this.initRoutineFormGroup();
     } else {
       this.routineId = this.router.url.split('/').pop() as unknown as number;
       this.fetchRoutine();
@@ -120,8 +128,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     this.apiService
       .createRoutine(this.routine)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        // redirect to routines
+      .subscribe(() => {
         this.router.navigate(['/routines']);
       });
   }
@@ -158,6 +165,7 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
         this.createExerciseFormGroup.reset();
         this.fetchExercises();
 
+        // append newly created exercise to session
         if (data) {
           if (!this.routine.exercises) {
             this.routine.exercises = [] as RoutineExercise[];
@@ -167,6 +175,13 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
             exercise_id: data.id,
             id: null as unknown,
           } as RoutineExercise);
+        }
+
+        // trigger toast
+        if (Object.keys(data).length > 0) {
+          this.toastService.showError('Can not create exercise');
+        } else {
+          this.toastService.showSuccess('Create exercise successfully');
         }
       });
   }
@@ -185,15 +200,24 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
 
   fetchRoutine() {
     if (!this.routineId) {
-      // TODO: add error here or redirect
+      this.toastService.showError('Invalid state');
+      this.router.navigate(['/routines']);
       return;
     }
     this.apiService
       .getRoutineById(this.routineId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
+        if (Object.keys(data).length == 0) {
+          this.toastService.showError('Can not get routine data');
+          this.router.navigate(['/routines']);
+          return;
+        }
+
         this.routine = data as Routine;
-        console.log(this.routine);
+
+        // populate data for form control;
+        this.initRoutineFormGroup();
       });
   }
 
@@ -256,11 +280,23 @@ export class RoutineFormComponent implements OnInit, OnDestroy {
     }
   }
 
-  public removeRoutine() {
-    this.apiService
-      .removeRoutineById(this.routineId)
+  private initRoutineFormGroup() {
+    this.routineFormGroup.setValue({
+      name: this.routine.name || '',
+      description: this.routine.description || '',
+    });
+
+    this.routineFormGroup.controls['name'].valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe((message) => {});
+      .subscribe((value) => {
+        this.routine.name = value || '';
+      });
+
+    this.routineFormGroup.controls['description'].valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.routine.description = value || '';
+      });
   }
 
   ngOnDestroy(): void {
