@@ -75,13 +75,16 @@ export class SessionFormComponent implements OnInit, OnDestroy {
   public session: Session = {} as Session;
   public exerciseDialogVisible: boolean = false;
   public exercisesVisible: boolean = false;
+  public counter: number = 0;
+
   public createExerciseFormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
   });
-  public counter: number = 0;
-
-  metaKey: boolean = true;
+  public sessionFormGroup = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+    description: new FormControl(''),
+  });
 
   constructor() {}
 
@@ -117,6 +120,9 @@ export class SessionFormComponent implements OnInit, OnDestroy {
         this.router.navigate(['routines']);
       }
       // Assume log new session with empty routine
+
+      // init session form
+      this.initSessionFormGroup();
     } else {
       this.sessionId = this.route.snapshot.paramMap.get(
         'id',
@@ -210,7 +216,8 @@ export class SessionFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.session = data as Session;
-        console.log(this.session);
+
+        this.initSessionFormGroup();
       });
   }
 
@@ -324,6 +331,25 @@ export class SessionFormComponent implements OnInit, OnDestroy {
     } else {
       this.filteredExercises = this.exercises;
     }
+  }
+
+  private initSessionFormGroup() {
+    this.sessionFormGroup.setValue({
+      name: this.session.name || '',
+      description: this.session.description || '',
+    });
+
+    this.sessionFormGroup.controls['name'].valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.session.name = value || '';
+      });
+
+    this.sessionFormGroup.controls['description'].valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.session.description = value || '';
+      });
   }
 
   ngOnDestroy(): void {

@@ -1,5 +1,4 @@
 import { ToastService } from './toast.service';
-import { DashboardGlance } from './../../shared/models/models';
 import {
   HttpClient,
   HttpErrorResponse,

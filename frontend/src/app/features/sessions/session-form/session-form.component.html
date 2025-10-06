@@ -9,7 +9,12 @@
     <div class="w-2/5 mx-auto flex flex-col gap-10">
       <div class="flex gap-5 items-center">
         @if (!sessionId) {
-          <p-button [rounded]="true" label="Save" (click)="saveSession()" />
+          <p-button
+            [disabled]="sessionFormGroup.invalid"
+            [rounded]="true"
+            label="Save"
+            (click)="saveSession()"
+          />
           <p-button
             [rounded]="true"
             [label]="
@@ -22,7 +27,12 @@
             </div>
             <div class="p-2 border-2 rounded-r-lg">Stop</div> -->
         } @else {
-          <p-button [rounded]="true" label="Update" (click)="updateSession()" />
+          <p-button
+            [disabled]="sessionFormGroup.invalid"
+            [rounded]="true"
+            label="Update"
+            (click)="updateSession()"
+          />
           <p-button
             [rounded]="true"
             [label]="
@@ -35,20 +45,24 @@
       <!-- TODO: drag and drop area -->
       <div>
         <!-- form for name and description of session form -->
-        <div>
+        <div [formGroup]="sessionFormGroup">
           <div class="flex items-center gap-4 mb-4">
-            <label for="username" class="font-semibold w-24">Name</label>
+            <label for="name" class="font-semibold w-24">Name</label>
             <input
-              [(ngModel)]="session.name"
+              formControlName="name"
+              id="name"
               pInputText
               class="flex-auto"
               autocomplete="off"
             />
           </div>
           <div class="flex items-center gap-4 mb-8">
-            <label for="email" class="font-semibold w-24">Description</label>
+            <label for="description" class="font-semibold w-24"
+              >Description</label
+            >
             <input
-              [(ngModel)]="session.description"
+              id="description"
+              formControlName="description"
               pInputText
               class="flex-auto"
               autocomplete="off"

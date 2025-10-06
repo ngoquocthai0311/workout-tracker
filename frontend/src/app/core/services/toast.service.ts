@@ -29,7 +29,7 @@ export class ToastService {
 
   showWarn(message: string) {
     this.messageService.add({
-      severity: 'warm',
+      severity: 'warn',
       summary: 'Warn',
       detail: message,
       life: this.life,

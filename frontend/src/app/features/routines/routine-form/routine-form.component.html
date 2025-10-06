@@ -5,6 +5,7 @@
 <!-- Focus on creating routine / edit routine first -->
 <div class="w-full relative">
   <!-- edit/ create routine -->
+
   <div class="mx-auto">
     <!-- header -->
     <div class="p-8">
@@ -20,29 +21,41 @@
       <!-- button -->
       <div>
         @if (routine.id) {
-          <p-button [rounded]="true" label="Update" (click)="updateRoutine()" />
+          <p-button
+            [disabled]="routineFormGroup.invalid"
+            [rounded]="true"
+            label="Update"
+            (click)="updateRoutine()"
+          />
         } @else {
-          <p-button [rounded]="true" label="Create" (click)="createRoutine()" />
+          <p-button
+            [disabled]="routineFormGroup.invalid"
+            [rounded]="true"
+            label="Create"
+            (click)="createRoutine()"
+          />
         }
       </div>
       <!-- form for name and description of session form -->
-      <div>
+      <div [formGroup]="routineFormGroup">
         <div class="flex items-center gap-4 mb-4">
-          <label for="username" class="font-semibold w-24">Name</label>
+          <label for="name" class="font-semibold w-24">Name</label>
           <input
-            [(ngModel)]="routine.name"
+            formControlName="name"
             pInputText
-            id="username"
+            id="name"
             class="flex-auto"
             autocomplete="off"
           />
         </div>
         <div class="flex items-center gap-4 mb-8">
-          <label for="email" class="font-semibold w-24">Description</label>
+          <label for="description" class="font-semibold w-24"
+            >Description</label
+          >
           <input
-            [(ngModel)]="routine.description"
+            formControlName="description"
             pInputText
-            id="email"
+            id="description"
             class="flex-auto"
             autocomplete="off"
           />
