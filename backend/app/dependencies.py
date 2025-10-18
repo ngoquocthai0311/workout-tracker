@@ -1,3 +1,4 @@
+from app.database.exercise_repository import ExerciseRepository
 from fastapi import Depends
 from sqlmodel import Session, create_engine
 from app.routers.mappers.sessions_mapper import WorkoutSessionMapper
@@ -71,6 +72,7 @@ class RedisService:
             except Exception as e:
                 print("Can't cache_value")
                 print(e)
+                pass
 
     def remove_cache(self, key: str):
         if self.redis_session:
@@ -79,6 +81,7 @@ class RedisService:
             except Exception as e:
                 print("Can't remove cache")
                 print(e)
+                pass
 
 
 # use this to init database
@@ -98,8 +101,16 @@ engine = create_engine(get_settings().DATABASE_URL, echo=get_settings().DATABASE
 # TODO: create a connection pool and let other uses it
 # @contextmanager
 def get_db():
-    with Session(engine) as session:
+    session = Session(engine)
+    try:
         yield session
+
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
 
 
 @lru_cache
@@ -125,19 +136,28 @@ def get_exercise_mapper():
 # TODO: create a connection pool and let other uses it
 # @contextmanager
 def get_redis():
+    session = None
     try:
-        with redis.Redis(
+        session = redis.Redis(
             host=os.getenv("REDIS_HOST", "localhost"),
             port=os.getenv("REDIS_PORT", 6379),
             db=os.getenv("REDIS_DATABASE_INDEX", 0),
             decode_responses=True,
-        ) as session:
-            yield session
+        )
+        yield session
     except Exception as e:
         print("Cant connect to redis database")
         print(e)
-        yield None
+        raise e
+    finally:
+        if session:
+            session.close()
 
 
 def get_redis_service(redis_session=Depends(get_redis)):
     return RedisService(redis_session)
+
+
+@lru_cache
+def get_exercise_repository():
+    return ExerciseRepository()
