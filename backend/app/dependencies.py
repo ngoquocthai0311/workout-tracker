@@ -1,4 +1,6 @@
 from app.database.exercise_repository import ExerciseRepository
+from app.database.routine_repository import RoutineRepository
+from app.database.session_repository import SessionRepository
 from fastapi import Depends
 from sqlmodel import Session, create_engine
 from app.routers.mappers.sessions_mapper import WorkoutSessionMapper
@@ -161,3 +163,13 @@ def get_redis_service(redis_session=Depends(get_redis)):
 @lru_cache
 def get_exercise_repository():
     return ExerciseRepository()
+
+
+@lru_cache
+def get_routine_repository():
+    return RoutineRepository()
+
+
+@lru_cache
+def get_session_repository():
+    return SessionRepository()
