@@ -16,6 +16,8 @@ from app.routers.mappers.dashboard_mapper import MONTH, ReportMapper
 
 router = APIRouter(tags=["dashboards"], prefix="/dashboards")
 
+# NOTE: Do dashboard repository in the future
+
 
 @router.get(
     "/weights/total/day",
