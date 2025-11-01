@@ -52,9 +52,6 @@ logger.add(
 # override HTTPException to inject logger method
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    print(request.method)
     messages: list = [request.method, request.url.path, exc.detail]
-
     logger.error(" - ".join(messages))
-
     return await default_http_handler(request, exc)
