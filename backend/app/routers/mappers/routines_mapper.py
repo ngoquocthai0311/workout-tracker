@@ -34,6 +34,7 @@ class RoutineMapper(BaseResponseMapper):
                     if exercise_link.exercise.personal_record
                     else None
                 )
+                exercise.sets = exercise_link.routine_exercise_sets
                 exercises.append(exercise)
 
             routine_response.exercises = exercises
@@ -67,6 +68,8 @@ class RoutineMapper(BaseResponseMapper):
                 if exercise_link.exercise.personal_record
                 else None
             )
+            exercise.sets = exercise_link.routine_exercise_sets
+
             exercises.append(exercise)
 
         results.exercises = exercises

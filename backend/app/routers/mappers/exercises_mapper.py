@@ -10,7 +10,6 @@ class ExerciseMapper(BaseResponseMapper):
         results: list[ExerciseResponse] = []
         for exercise in exercises:
             result = ExerciseResponse.model_validate(exercise)
-            print(result)
             if exercise.personal_record:
                 result.personal_record = MaxWeightResponse.model_validate(
                     exercise.personal_record
