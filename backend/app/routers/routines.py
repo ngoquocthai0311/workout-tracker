@@ -6,7 +6,14 @@ from app.routers.schemas.request_schemas import (
     CreateRoutineRequest,
     UpdateRoutineRequest,
 )
-from app.dependencies import get_db, get_routine_mapper, get_routine_repository
+from app.dependencies import (
+    get_db,
+    get_routine_mapper,
+    get_routine_repository,
+    get_redis_service,
+    RedisService,
+    RedisResourceKey,
+)
 from app.routers.schemas.response_schemas import RoutineResponse
 from app.routers.mappers.routines_mapper import RoutineMapper
 from app.database.routine_repository import RoutineRepository
@@ -22,10 +29,18 @@ def read_routines(
     mapper: RoutineMapper = Depends(get_routine_mapper),
     session: Session = Depends(get_db),
     routine_repository: RoutineRepository = Depends(get_routine_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
+        cache_value = redis_service.get_value(RedisResourceKey.ROUTINES)
+        if cache_value:
+            return cache_value
+
         routines = routine_repository.get_all(session)
-        return mapper.map_list_to_response(routines)
+        routines = mapper.map_list_to_response(routines)
+        redis_service.cache_value(RedisResourceKey.ROUTINES, routines)
+
+        return routines
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -66,9 +81,11 @@ def create_routine(
     mapper: RoutineMapper = Depends(get_routine_mapper),
     session: Session = Depends(get_db),
     routine_repository: RoutineRepository = Depends(get_routine_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         routine = routine_repository.create(session, input)
+        redis_service.remove_cache(RedisResourceKey.ROUTINES)
 
         return mapper.transform_to_response(routine)
     except HTTPException as e:
@@ -91,11 +108,14 @@ def update_routine(
     mapper: RoutineMapper = Depends(get_routine_mapper),
     session: Session = Depends(get_db),
     routine_repository: RoutineRepository = Depends(get_routine_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         updated_routine = routine_repository.update(session, routine_id, input)
         if not updated_routine:
             return Response(status_code=204)
+
+        redis_service.remove_cache(RedisResourceKey.ROUTINES)
 
         return mapper.transform_to_response(updated_routine)
     except HTTPException as e:
@@ -112,9 +132,11 @@ def delete_routine(
     routine_id: int,
     session: Session = Depends(get_db),
     routine_repository: RoutineRepository = Depends(get_routine_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         routine_repository.remove_by_id(session, routine_id)
+        redis_service.remove_cache(RedisResourceKey.ROUTINES)
         return JSONResponse(
             status_code=200, content={"message": "Routine deleted successfully"}
         )

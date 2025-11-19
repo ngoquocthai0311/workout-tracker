@@ -8,7 +8,14 @@ from app.routers.schemas.request_schemas import (
     CreateWorkoutSessionRequest,
     UpdateWorkoutSessionRequest,
 )
-from app.dependencies import get_db, get_workout_session_mapper, get_session_repository
+from app.dependencies import (
+    get_db,
+    get_workout_session_mapper,
+    get_session_repository,
+    RedisService,
+    get_redis_service,
+    RedisResourceKey,
+)
 from app.routers.schemas.response_schemas import (
     SessionResponse,
 )
@@ -26,10 +33,17 @@ def read_sessions(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
     session_repository: SessionRepository = Depends(get_session_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
+        cache_value = redis_service.get_value(RedisResourceKey.WORKOUT_SESSION)
+        if cache_value:
+            return cache_value
         workout_sessions = session_repository.get_all(session)
-        return mapper.map_list_to_response(workout_sessions)
+        workout_sessions = mapper.map_list_to_response(workout_sessions)
+        redis_service.cache_value(RedisResourceKey.WORKOUT_SESSION, workout_sessions)
+
+        return workout_sessions
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -68,9 +82,11 @@ def create_session(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
     session_repository: SessionRepository = Depends(get_session_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         created_workout_session = session_repository.create(session, input)
+        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
         return mapper.transform_to_response(created_workout_session)
     except Exception as e:
         raise HTTPException(
@@ -90,11 +106,14 @@ def update_session(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
     session_repository: SessionRepository = Depends(get_session_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         updated_session = session_repository.update(session, workout_session_id, input)
         if not update_session:
             return Response(status_code=204)
+
+        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
         return mapper.transform_to_response(updated_session)
     except HTTPException as e:
         raise e
@@ -110,9 +129,11 @@ def delete_Session(
     workout_session_id: int,
     session: Session = Depends(get_db),
     session_repository: SessionRepository = Depends(get_session_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         session_repository.remove_by_id(session, workout_session_id)
+        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
         return JSONResponse(
             status_code=200, content={"message": "Workout session deleted successfully"}
         )

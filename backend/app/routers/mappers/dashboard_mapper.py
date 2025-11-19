@@ -3,6 +3,7 @@ from app.routers.schemas.response_schemas import (
     DayReportResponse,
     WeekReportResponse,
     YearReportResponse,
+    GlanceReportResponse,
 )
 from enum import Enum
 
@@ -27,6 +28,9 @@ class ReportMapper(BaseResponseMapper):
             dict_results[month.value] = results[index]
 
         return YearReportResponse(dict_results)
+
+    def map_glance_response(self, results: object) -> GlanceReportResponse:
+        return GlanceReportResponse.model_validate(results)
 
 
 class TIMERANGE(Enum):
