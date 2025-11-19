@@ -101,4 +101,11 @@ class YearReportResponse(RootModel[dict[str, int]]):
     root: dict[str, int]
 
 
+class GlanceReportResponse(SQLModel):
+    total_workouts: int = 0
+    total_volumes: int = 0
+    streaks: int = 0
+    last_workout: object = 0
+
+
 # endregion

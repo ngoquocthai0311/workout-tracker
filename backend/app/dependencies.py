@@ -1,3 +1,4 @@
+from app.database.dashboard_repository import DashboardRepository
 from app.database.exercise_repository import ExerciseRepository
 from app.database.routine_repository import RoutineRepository
 from app.database.session_repository import SessionRepository
@@ -173,3 +174,8 @@ def get_routine_repository():
 @lru_cache
 def get_session_repository():
     return SessionRepository()
+
+
+@lru_cache
+def get_dashboard_repository():
+    return DashboardRepository()

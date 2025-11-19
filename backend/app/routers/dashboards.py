@@ -5,14 +5,15 @@ from dateutil.relativedelta import relativedelta
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, and_, case, func, select
 
-from app.database.models import SessionExercise, WorkoutSession
+from app.database.models import SessionExercise
 from app.routers.schemas.response_schemas import (
     DayReportResponse,
     WeekReportResponse,
     YearReportResponse,
 )
-from app.dependencies import get_db, get_report_mapper
+from app.dependencies import get_db, get_report_mapper, get_dashboard_repository
 from app.routers.mappers.dashboard_mapper import MONTH, ReportMapper
+from app.database.dashboard_repository import DashboardRepository
 
 router = APIRouter(tags=["dashboards"], prefix="/dashboards")
 
@@ -157,76 +158,12 @@ def get_total_weights_by_year(
 
 @router.get(
     "/glance",
-    dependencies=[Depends(get_db)],
 )
 def get_a_glance(
     session: Session = Depends(get_db),
+    dashboard_repository: DashboardRepository = Depends(get_dashboard_repository),
+    report_mapper: ReportMapper = Depends(get_report_mapper),
 ):
-    # total recent workout
-    current_date_obj = datetime.now(timezone.utc)
-    week_start_day_obj = current_date_obj - relativedelta(
-        days=current_date_obj.weekday()
-    )
-    recent_workouts = session.exec(
-        select(
-            func.count(
-                case(
-                    (
-                        (WorkoutSession.created_at > week_start_day_obj.timestamp())
-                        & (WorkoutSession.created_at < current_date_obj.timestamp()),
-                        1,
-                    ),
-                    else_=0,
-                )
-            )
-        )
-    ).one()
+    results = dashboard_repository.get_glance(session)
 
-    # total volumes 1 week
-    total_volumes = session.exec(
-        select(
-            func.sum(
-                case(
-                    (
-                        (SessionExercise.created_at > week_start_day_obj.timestamp())
-                        & (SessionExercise.created_at < current_date_obj.timestamp()),
-                        SessionExercise.weight_lifted,
-                    ),
-                    else_=0,
-                )
-            )
-        )
-    ).one()
-    # current streak
-    first_day_of_a_year_obj = datetime(current_date_obj.year, 1, 1, tzinfo=timezone.utc)
-    streaks = session.exec(
-        select(
-            func.count(
-                case(
-                    (
-                        (
-                            WorkoutSession.created_at
-                            > first_day_of_a_year_obj.timestamp()
-                        )
-                        & (WorkoutSession.created_at < current_date_obj.timestamp()),
-                        1,
-                    ),
-                    else_=0,
-                )
-            )
-        )
-    ).one()
-
-    # last workout
-    last_workout_statement = (
-        select(WorkoutSession.created_at)
-        .order_by(WorkoutSession.created_at.desc())
-        .limit(1)
-    )
-    last_workout = session.exec(last_workout_statement).one_or_none()
-    return {
-        "total_workouts": recent_workouts or 0,
-        "total_volumes": total_volumes or 0,
-        "streaks": streaks or 0,
-        "last_workout": last_workout or None,
-    }
+    return report_mapper.map_glance_response(results)
