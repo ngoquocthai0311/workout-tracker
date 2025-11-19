@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, and_, case, func, select
 
 from app.database.models import SessionExercise
@@ -11,7 +11,14 @@ from app.routers.schemas.response_schemas import (
     WeekReportResponse,
     YearReportResponse,
 )
-from app.dependencies import get_db, get_report_mapper, get_dashboard_repository
+from app.dependencies import (
+    RedisService,
+    get_redis_service,
+    get_db,
+    get_report_mapper,
+    get_dashboard_repository,
+    RedisResourceKey,
+)
 from app.routers.mappers.dashboard_mapper import MONTH, ReportMapper
 from app.database.dashboard_repository import DashboardRepository
 
@@ -163,7 +170,21 @@ def get_a_glance(
     session: Session = Depends(get_db),
     dashboard_repository: DashboardRepository = Depends(get_dashboard_repository),
     report_mapper: ReportMapper = Depends(get_report_mapper),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
-    results = dashboard_repository.get_glance(session)
+    try:
+        cache_value = redis_service.get_value(RedisResourceKey.DASHBOARDS_GLANCE)
+        if cache_value:
+            return cache_value
 
-    return report_mapper.map_glance_response(results)
+        results = dashboard_repository.get_glance(session)
+
+        if results:
+            redis_service.cache_value(RedisResourceKey.DASHBOARDS_GLANCE, results)
+
+        return report_mapper.map_glance_response(results)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An internal error occurred: {e.__class__.__name__}",
+        )

@@ -17,6 +17,8 @@ import redis
 from redis import Redis
 import json
 from typing import Optional
+from enum import Enum
+from decimal import Decimal
 
 
 class Settings:
@@ -40,46 +42,77 @@ class Settings:
         self.SQLALCHEMY_URL: str = f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASS}@{self.DATABASE_HOST}/{self.DATABASE_NAME}"
 
 
+class RedisResourceKey(Enum):
+    EXERCISES = "exercises"
+    WORKOUT_SESSION = "workout_sessions"
+    DASHBOARDS = "dashboards"
+    ROUTINES = "routines"
+
+    DASHBOARDS_GLANCE = f"{DASHBOARDS}/glance"
+
+
 class RedisService:
     def __init__(self, redis_session: Optional[Redis]):
         self.redis_session: Optional[Redis] = redis_session
         # 2 hours
         self.key_duration: int = 7200
 
-    def get_value(self, key: str):
+    def get_value(self, resource_type: RedisResourceKey, user_id: int = None):
         if self.redis_session:
             try:
+                key: str = f"{resource_type.value}/{user_id if user_id else 1}"
                 value_str = self.redis_session.get(key)
                 if value_str:
                     return json.loads(value_str)
-            except Exception as e:
+            except Exception:
                 # NOTE: Do logging here
                 print("Redis may be failed or empty")
-                print(e)
                 pass
 
         return None
 
-    def cache_value(self, key: str, value: list | object):
+    def cache_value(
+        self,
+        resource_type: RedisResourceKey,
+        value: list | object | str,
+        user_id: int = None,
+    ):
+        def custom_json_serializer(obj):
+            if isinstance(obj, Decimal):
+                return float(obj)
+
+            # 2. Handle Pydantic/SQLModel (recurses automatically)
+            if hasattr(obj, "model_dump"):
+                return obj.model_dump()
+
+            # 3. Handle older Pydantic v1
+            if hasattr(obj, "dict"):
+                return obj.dict()
+
+            raise TypeError(
+                f"Object of type {type(obj).__name__} is not JSON serializable"
+            )
+
         if self.redis_session:
             # maybe trigger background tasks here instead of waiting
             # save response in 2 hours
             try:
+                key: str = f"{resource_type.value}/{user_id if user_id else 1}"
+                payload = json.dumps(value, default=custom_json_serializer)
                 self.redis_session.setex(
                     key,
                     self.key_duration,
-                    json.dumps([item.__dict__ for item in value])
-                    if isinstance(value, list)
-                    else json.dumps(value),
+                    payload,
                 )
             except Exception as e:
                 print("Can't cache_value")
                 print(e)
                 pass
 
-    def remove_cache(self, key: str):
+    def remove_cache(self, resource_type: RedisResourceKey, user_id: int = None):
         if self.redis_session:
             try:
+                key: str = f"{resource_type.value}/{user_id if user_id else 1}"
                 self.redis_session.delete(key)
             except Exception as e:
                 print("Can't remove cache")

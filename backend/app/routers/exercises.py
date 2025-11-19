@@ -12,6 +12,7 @@ from app.dependencies import (
     get_exercise_mapper,
     get_redis_service,
     RedisService,
+    RedisResourceKey,
 )
 from app.routers.schemas.response_schemas import ExerciseResponse
 from app.routers.mappers.exercises_mapper import ExerciseMapper
@@ -34,20 +35,16 @@ def read_exercises(
 ):
     try:
         # TODO: Assume one user only with id 1
-        cache_value = redis_service.get_value("user_1_exercises")
+        cache_value = redis_service.get_value(RedisResourceKey.EXERCISES)
         if cache_value:
             return cache_value
 
         exercises = exercise_repository.get_all(session=session)
-
         exercises = mapper.map_list_to_response(exercises)
 
-        # cache value in redis
-        redis_service.cache_value("user_1_exercises", exercises)
-
+        redis_service.cache_value(RedisResourceKey.EXERCISES, exercises)
         return exercises
     except Exception as e:
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An internal error occurred: {e.__class__.__name__}",
@@ -69,6 +66,7 @@ def get_exercise(
 
         if not exercise:
             raise HTTPException(status_code=404, detail="Exercise not found")
+
         mapper.transform_to_response(exercise=exercise)
         return mapper.transform_to_response(exercise=exercise)
     except Exception as e:
@@ -92,7 +90,7 @@ def create_exercise(
     exercise = exercise_repository.create(session, input)
 
     # remove cache
-    redis_service.remove_cache("user_1_exercises")
+    redis_service.remove_cache(RedisResourceKey.EXERCISES)
 
     return mapper.transform_to_response(exercise=exercise)
 
@@ -116,7 +114,7 @@ def update_exercise(
 
         if updated_exercise:
             # remove cache
-            redis_service.remove_cache("user_1_exercises")
+            redis_service.remove_cache(RedisResourceKey.EXERCISES)
             return mapper.transform_to_response(updated_exercise)
 
         return Response(status_code=204)
@@ -141,7 +139,7 @@ def delete_exercise(
     try:
         exercise_repository.remove_by_id(session, exercise_id)
         # remove cache
-        redis_service.remove_cache("user_1_exercises")
+        redis_service.remove_cache(RedisResourceKey.EXERCISES)
         return JSONResponse(
             status_code=200, content={"message": "Exercise deleted successfully"}
         )

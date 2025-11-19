@@ -8,7 +8,13 @@ from app.routers.schemas.request_schemas import (
     CreateWorkoutSessionRequest,
     UpdateWorkoutSessionRequest,
 )
-from app.dependencies import get_db, get_workout_session_mapper, get_session_repository
+from app.dependencies import (
+    get_db,
+    get_workout_session_mapper,
+    get_session_repository,
+    RedisService,
+    get_redis_service,
+)
 from app.routers.schemas.response_schemas import (
     SessionResponse,
 )
@@ -68,6 +74,7 @@ def create_session(
     mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
     session: Session = Depends(get_db),
     session_repository: SessionRepository = Depends(get_session_repository),
+    redis_service: RedisService = Depends(get_redis_service),
 ):
     try:
         created_workout_session = session_repository.create(session, input)
