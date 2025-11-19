@@ -113,6 +113,11 @@ class RedisService:
         if self.redis_session:
             try:
                 key: str = f"{resource_type.value}/{user_id if user_id else 1}"
+
+                if not self.redis_session.get(key):
+                    # NOTE: add logger here to indicate no action
+                    return
+
                 self.redis_session.delete(key)
             except Exception as e:
                 print("Can't remove cache")
