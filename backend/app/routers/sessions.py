@@ -1,25 +1,16 @@
-from app.database.session_repository import SessionRepository
+from backend.app.services.session_service import get_session_service
+from backend.app.services.session_service import SessionService
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse, Response
-from sqlmodel import Session
+from fastapi.responses import JSONResponse
 
 from app.routers.schemas.request_schemas import (
     CreateWorkoutSessionRequest,
     UpdateWorkoutSessionRequest,
 )
-from app.dependencies import (
-    get_db,
-    get_workout_session_mapper,
-    get_session_repository,
-    RedisService,
-    get_redis_service,
-    RedisResourceKey,
-)
 from app.routers.schemas.response_schemas import (
     SessionResponse,
 )
-from app.routers.mappers.sessions_mapper import WorkoutSessionMapper
 
 router = APIRouter(tags=["sessions"], prefix="/sessions")
 
@@ -27,23 +18,12 @@ router = APIRouter(tags=["sessions"], prefix="/sessions")
 @router.get(
     "",
     response_model=list[SessionResponse],
-    dependencies=[Depends(get_db), Depends(get_workout_session_mapper)],
 )
 def read_sessions(
-    mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
-    session: Session = Depends(get_db),
-    session_repository: SessionRepository = Depends(get_session_repository),
-    redis_service: RedisService = Depends(get_redis_service),
+    session_service: SessionService = Depends(get_session_service),
 ):
     try:
-        cache_value = redis_service.get_value(RedisResourceKey.WORKOUT_SESSION)
-        if cache_value:
-            return cache_value
-        workout_sessions = session_repository.get_all(session)
-        workout_sessions = mapper.map_list_to_response(workout_sessions)
-        redis_service.cache_value(RedisResourceKey.WORKOUT_SESSION, workout_sessions)
-
-        return workout_sessions
+        return session_service.get_all()
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -54,17 +34,13 @@ def read_sessions(
 @router.get(
     "/{workout_session_id}",
     response_model=SessionResponse,
-    dependencies=[Depends(get_db), Depends(get_workout_session_mapper)],
 )
 def get_session(
     workout_session_id: int,
-    mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
-    session: Session = Depends(get_db),
-    session_repository: SessionRepository = Depends(get_session_repository),
+    session_service: SessionService = Depends(get_session_service),
 ):
     try:
-        workout_session = session_repository.get_by_id(session, workout_session_id)
-        return mapper.transform_to_response(workout_session)
+        return session_service.get_one(workout_session_id)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -75,19 +51,13 @@ def get_session(
 @router.post(
     "",
     response_model=SessionResponse,
-    dependencies=[Depends(get_db), Depends(get_workout_session_mapper)],
 )
 def create_session(
     input: CreateWorkoutSessionRequest,
-    mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
-    session: Session = Depends(get_db),
-    session_repository: SessionRepository = Depends(get_session_repository),
-    redis_service: RedisService = Depends(get_redis_service),
+    session_service: SessionService = Depends(get_session_service),
 ):
     try:
-        created_workout_session = session_repository.create(session, input)
-        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
-        return mapper.transform_to_response(created_workout_session)
+        return session_service.create(input)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -98,23 +68,14 @@ def create_session(
 @router.patch(
     "/{workout_session_id}",
     response_model=SessionResponse,
-    dependencies=[Depends(get_db), Depends(get_workout_session_mapper)],
 )
 def update_session(
     workout_session_id: int,
     input: UpdateWorkoutSessionRequest,
-    mapper: WorkoutSessionMapper = Depends(get_workout_session_mapper),
-    session: Session = Depends(get_db),
-    session_repository: SessionRepository = Depends(get_session_repository),
-    redis_service: RedisService = Depends(get_redis_service),
+    session_service: SessionService = Depends(get_session_service),
 ):
     try:
-        updated_session = session_repository.update(session, workout_session_id, input)
-        if not update_session:
-            return Response(status_code=204)
-
-        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
-        return mapper.transform_to_response(updated_session)
+        return session_service.update(workout_session_id, input)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -124,16 +85,13 @@ def update_session(
         )
 
 
-@router.delete("/{workout_session_id}", dependencies=[Depends(get_db)])
+@router.delete("/{workout_session_id}")
 def delete_Session(
     workout_session_id: int,
-    session: Session = Depends(get_db),
-    session_repository: SessionRepository = Depends(get_session_repository),
-    redis_service: RedisService = Depends(get_redis_service),
+    session_service: SessionService = Depends(get_session_service),
 ):
     try:
-        session_repository.remove_by_id(session, workout_session_id)
-        redis_service.remove_cache(RedisResourceKey.WORKOUT_SESSION)
+        session_service.delete(workout_session_id)
         return JSONResponse(
             status_code=200, content={"message": "Workout session deleted successfully"}
         )

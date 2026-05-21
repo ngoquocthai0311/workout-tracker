@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from sqlmodel import Session
 
 
-class CommonRepository(ABC):
+class BaseRepository(ABC):
     @abstractmethod
     def get_by_id(self, session: Session, id: int):
         pass
