@@ -179,12 +179,19 @@ def get_exercise_mapper():
 def get_redis():
     session = None
     try:
-        session = redis.Redis(
-            host=os.getenv("REDIS_HOST", "localhost"),
-            port=os.getenv("REDIS_PORT", 6379),
-            db=os.getenv("REDIS_DATABASE_INDEX", 0),
-            decode_responses=True,
-        )
+        redis_url = os.getenv("REDIS_URL")
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        if redis_url:
+            session = redis.Redis.from_url(redis_url, decode_responses=True)
+        elif redis_host.startswith("redis://") or redis_host.startswith("rediss://"):
+            session = redis.Redis.from_url(redis_host, decode_responses=True)
+        else:
+            session = redis.Redis(
+                host=redis_host,
+                port=int(os.getenv("REDIS_PORT", 6379)),
+                db=int(os.getenv("REDIS_DATABASE_INDEX", 0)),
+                decode_responses=True,
+            )
         yield session
     except Exception as e:
         print("Cant connect to redis database")
