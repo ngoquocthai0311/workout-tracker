@@ -3,12 +3,10 @@ services:
     image: postgres:16.9-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - ${DATABASE_PORT:-5432}:5432
     environment:
       - POSTGRES_USER=${DATABASE_USER:-user}
       - POSTGRES_PASSWORD=${DATABASE_PASS:-password}
-      - POSTGRES_DB=${DATABASE_PASS:-workouttrackerdb}
+      - POSTGRES_DB=${DATABASE_NAME:-workouttrackerdb}
     networks:
       - backend-network
 
@@ -20,10 +18,10 @@ services:
       - DATABASE_USER=${DATABASE_USER:-user}
       - DATABASE_PASS=${DATABASE_PASS:-password}
       - DATABASE_PORT=${DATABASE_PORT:-5432}
-      - DATABASE_NAME=${DATABASE_PASS:-workouttrackerdb}
+      - DATABASE_NAME=${DATABASE_NAME:-workouttrackerdb}
       - DATABASE_ECHO=${DATABASE_ECHO:-0}
-      # NOTE: database host is the name of the "db" image
-      - DATABASE_HOST=db
+      # NOTE: database host is the name of the "db" image if run local
+      - DATABASE_HOST=${DATABASE_HOST:-db}
     ports:
       - "8000:8000"
     networks:

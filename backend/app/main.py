@@ -4,10 +4,25 @@ import sys
 import os
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import dashboards, exercises, routines, sessions, users
 
+
 app = FastAPI()
+
+# cors
+origins = [
+    "http://localhost:4200",  # Frontend URL , local host
+    "https://*.vercel.app",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # allow methods
+    allow_headers=["*"],  # allow headers
+)
 
 app.include_router(dashboards.router, prefix="/api/v1", tags=["dashboards"])
 app.include_router(users.router, prefix="/api/v1", tags=["users"])
