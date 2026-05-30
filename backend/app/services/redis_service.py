@@ -11,7 +11,6 @@ class RedisResourceKey(Enum):
     WORKOUT_SESSION = "workout_sessions"
     DASHBOARDS = "dashboards"
     ROUTINES = "routines"
-    DASHBOARDS = "DASHBOARDS"
 
 
 class RedisService:

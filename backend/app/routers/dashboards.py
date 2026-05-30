@@ -1,5 +1,5 @@
-from backend.app.services.dashboard_service import get_dashboard_service
-from backend.app.services.dashboard_service import DashboardService
+from app.services.dashboard_service import get_dashboard_service
+from app.services.dashboard_service import DashboardService
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status

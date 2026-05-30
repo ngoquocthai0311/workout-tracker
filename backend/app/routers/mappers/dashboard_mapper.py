@@ -1,3 +1,4 @@
+from typing import Any
 from app.routers.mappers.base_mapper import BaseResponseMapper
 from app.routers.schemas.response_schemas import (
     DayReportResponse,
@@ -9,7 +10,10 @@ from enum import Enum
 
 
 class ReportMapper(BaseResponseMapper):
-    def map_list_to_response(self, results: tuple):
+    def transform_to_response(self, obj: Any):
+        pass
+
+    def map_list_to_response(self, objs: list[Any]):
         pass
 
     def transform_to_day_response(self, total_weights: int = 0):

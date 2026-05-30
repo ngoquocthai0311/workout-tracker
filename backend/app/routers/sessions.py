@@ -1,5 +1,5 @@
-from backend.app.services.session_service import get_session_service
-from backend.app.services.session_service import SessionService
+from app.services.session_service import get_session_service
+from app.services.session_service import SessionService
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse

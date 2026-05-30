@@ -40,7 +40,7 @@ class BaseService(ABC):
         if not result:
             raise HTTPException(status_code=404, detail="Not found")
 
-        return self.mapper.transform_to_response(obj=result)
+        return self.mapper.transform_to_response(result)
 
     def create(self, input_data: Any):
         result = self.repository.create(self.db_session, input_data)
@@ -48,7 +48,7 @@ class BaseService(ABC):
         # remove cache
         self.redis_service.remove_cache(self.redis_key)
 
-        return self.mapper.transform_to_response(obj=result)
+        return self.mapper.transform_to_response(result)
 
     def update(self, obj_id: int, input_data: Any):
         updated_result = self.repository.update(self.db_session, obj_id, input_data)

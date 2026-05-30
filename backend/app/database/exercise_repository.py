@@ -1,9 +1,9 @@
+from app.database.base_repository import BaseRepository
 from app.routers.schemas.request_schemas import (
     CreateExerciseRequest,
     UpdateExerciseRequest,
 )
 from datetime import datetime, timezone
-from app.database.common_repository import BaseRepository
 from fastapi import HTTPException
 from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select

@@ -1,5 +1,5 @@
-from backend.app.services.routine_service import RoutineService
-from backend.app.services.routine_service import get_routine_service
+from app.services.routine_service import RoutineService
+from app.services.routine_service import get_routine_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 

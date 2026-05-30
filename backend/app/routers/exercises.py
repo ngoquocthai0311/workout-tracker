@@ -33,8 +33,10 @@ def get_exercise(
     exercise_id: int, exercise_service: ExerciseService = Depends(get_exercise_service)
 ):
     try:
+        print("sdasdasd")
         return exercise_service.get_one(exercise_id)
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An internal error occurred: {e.__class__.__name__}",
