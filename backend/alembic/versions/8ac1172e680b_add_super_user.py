@@ -5,6 +5,7 @@ Revises: 470518bfe0bb
 Create Date: 2025-10-06 15:17:11.712115
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -15,8 +16,8 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = '8ac1172e680b'
-down_revision: Union[str, Sequence[str], None] = '470518bfe0bb'
+revision: str = "8ac1172e680b"
+down_revision: Union[str, Sequence[str], None] = "470518bfe0bb"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -28,11 +29,11 @@ def upgrade() -> None:
         "users",
         column("username", String),
         column("created_at", Float),
-        column("updated_at", Float)
+        column("updated_at", Float),
     )
-    op.bulk_insert(user_table, [{
-        'username': 'admin', 'created_at': 0, 'updated_at': 0
-    }])
+    op.bulk_insert(
+        user_table, [{"username": "admin", "created_at": 0, "updated_at": 0}]
+    )
     # ### end Alembic commands ###
 
 
@@ -43,9 +44,7 @@ def downgrade() -> None:
         "users",
         column("username", String),
         column("created_at", Float),
-        column("updated_at", Float)
+        column("updated_at", Float),
     )
-    op.execute(
-        user_table.delete().where(user_table.c.username == 'admin')
-    )
+    op.execute(user_table.delete().where(user_table.c.username == "admin"))
     # ### end Alembic commands ###

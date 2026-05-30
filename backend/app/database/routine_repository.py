@@ -3,7 +3,7 @@ from app.routers.schemas.request_schemas import (
     UpdateRoutineRequest,
 )
 from datetime import datetime, timezone
-from app.database.common_repository import CommonRepository
+from app.database.common_repository import BaseRepository
 from fastapi import HTTPException
 from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RoutineRepository(CommonRepository):
+class RoutineRepository(BaseRepository):
     def get_by_id(self, session: Session, id: int):
         try:
             routine = session.exec(

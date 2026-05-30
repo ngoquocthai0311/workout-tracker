@@ -1,3 +1,5 @@
 .vscode
 .env
 logs
+*.md
+.ruff_cache

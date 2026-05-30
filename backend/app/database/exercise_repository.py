@@ -3,7 +3,7 @@ from app.routers.schemas.request_schemas import (
     UpdateExerciseRequest,
 )
 from datetime import datetime, timezone
-from app.database.common_repository import CommonRepository
+from app.database.common_repository import BaseRepository
 from fastapi import HTTPException
 from sqlalchemy.orm import joinedload
 from sqlmodel import Session, select
@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ExerciseRepository(CommonRepository):
+class ExerciseRepository(BaseRepository):
     def get_by_id(self, session: Session, id: int):
         try:
             exercise = session.exec(
